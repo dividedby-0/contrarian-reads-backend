@@ -9,10 +9,16 @@ namespace contrarian_reads_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BooksController(ApplicationDbContext context, IMapper mapper) : ControllerBase
+    public class BooksController : ControllerBase
     {
-        private readonly ApplicationDbContext _context = context;
-        private readonly IMapper _mapper = mapper;
+        private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
+
+        public BooksController(ApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
