@@ -1,4 +1,5 @@
-﻿using contrarian_reads_backend.Data;
+﻿using AutoMapper;
+using contrarian_reads_backend.Data;
 using contrarian_reads_backend.DTOs;
 using contrarian_reads_backend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -6,21 +7,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace contrarian_reads_backend.Controllers
 {
-    // /api/books
     [Route("api/[controller]")]
     [ApiController]
-    public class BooksController(ApplicationDbContext context) : ControllerBase
+    public class BooksController(ApplicationDbContext context, IMapper mapper) : ControllerBase
     {
         private readonly ApplicationDbContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
-        // GET: api/books
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
         {
-            return await _context.Books.ToListAsync();
+            var books = await _context.Books
+                .Include(b => b.BookAlternatives)
+                .ThenInclude(ba => ba.AlternativeBook)
+                .Include(b => b.AlternativeToBooks)
+                .ThenInclude(ba => ba.OriginalBook)
+                .ToListAsync();
+
+            var bookDtos = _mapper.Map<IEnumerable<BookDto>>(books);
+
+            return Ok(bookDtos);
         }
 
-        // GET: api/books/{originalBookId}
         [HttpGet("{originalBookId}")]
         public async Task<ActionResult<Book>> GetBook(Guid originalBookId)
         {
@@ -31,22 +39,23 @@ namespace contrarian_reads_backend.Controllers
                 return NotFound();
             }
 
-            return book;
+            var bookDto = _mapper.Map<BookDto>(book);
+
+            return Ok(bookDto);
         }
 
-        // POST: api/books
         [HttpPost]
-        public async Task<ActionResult<Book>> CreateBook([FromBody] Book book)
+        public async Task<ActionResult<BookDto>> CreateBook([FromBody] Book book)
         {
             book.Id = Guid.NewGuid();
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetBook), new { originalBookId = book.Id }, book);
+            var bookDto = _mapper.Map<BookDto>(book);
+            return CreatedAtAction(nameof(GetBook), new { originalBookId = book.Id }, bookDto);
         }
 
-        // GET: api/books/{originalBookId}/alternatives
         [HttpGet("{originalBookId}/alternatives")]
         public async Task<ActionResult<IEnumerable<BookAlternativeDto>>> GetAlternativesForBook(Guid originalBookId)
         {
@@ -61,27 +70,10 @@ namespace contrarian_reads_backend.Controllers
                 return NotFound();
             }
 
-            var responses = alternatives.Select(alternative => new BookAlternativeDto
-            {
-                Id = alternative.Id,
-                OriginalBook = new BookDto
-                {
-                    Id = alternative.OriginalBook.Id,
-                    Title = alternative.OriginalBook.Title,
-                    Author = alternative.OriginalBook.Author,
-                },
-                AlternativeBook = new BookDto
-                {
-                    Id = alternative.AlternativeBook.Id,
-                    Title = alternative.AlternativeBook.Title,
-                    Author = alternative.AlternativeBook.Author,
-                },
-            });
-
-            return Ok(responses);
+            var alternativeDtos = _mapper.Map<IEnumerable<BookAlternativeDto>>(alternatives);
+            return Ok(alternativeDtos);
         }
 
-        // POST: api/books/{originalBookId}/alternatives
         [HttpPost("{originalBookId}/alternatives")]
         public async Task<ActionResult<BookAlternativeDto>> AddBookAlternative(Guid originalBookId, [FromBody] BookAlternative alternative)
         {
@@ -111,27 +103,10 @@ namespace contrarian_reads_backend.Controllers
             _context.BookAlternatives.Add(alternative);
             await _context.SaveChangesAsync();
 
-            var response = new BookAlternativeDto
-            {
-                Id = alternative.Id,
-                OriginalBook = new BookDto
-                {
-                    Id = originalBook.Id,
-                    Title = originalBook.Title,
-                    Author = originalBook.Author,
-                },
-                AlternativeBook = new BookDto
-                {
-                    Id = alternativeBook.Id,
-                    Title = alternativeBook.Title,
-                    Author = alternativeBook.Author,
-                },
-            };
-
-            return Ok(response);
+            var alternativeDto = _mapper.Map<BookAlternativeDto>(alternative);
+            return Ok(alternativeDto);
         }
 
-        // GET: api/books/{originalBookId}/alternatives/{alternativeId}
         [HttpGet("{originalBookId}/alternatives/{alternativeId}")]
         public async Task<ActionResult<BookAlternativeDto>> GetBookAlternatives(Guid originalBookId, Guid alternativeId)
         {
@@ -145,22 +120,8 @@ namespace contrarian_reads_backend.Controllers
                 return NotFound();
             }
 
-            return new BookAlternativeDto
-            {
-                Id = alternative.Id,
-                OriginalBook = new BookDto
-                {
-                    Id = alternative.OriginalBook.Id,
-                    Title = alternative.OriginalBook.Title,
-                    Author = alternative.OriginalBook.Author,
-                },
-                AlternativeBook = new BookDto
-                {
-                    Id = alternative.AlternativeBook.Id,
-                    Title = alternative.AlternativeBook.Title,
-                    Author = alternative.AlternativeBook.Author,
-                },
-            };
+            var alternativeDto = _mapper.Map<BookAlternativeDto>(alternative);
+            return Ok(alternativeDto);
         }
     }
 }
