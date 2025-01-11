@@ -2,28 +2,17 @@
 {
     public class Book
     {
-        public Guid Id { get; set; }
-        public string? Title { get; set; }
-        public string? Author { get; set; }
-        public ICollection<BookAlternative>? BookAlternatives { get; set; }
-        public ICollection<BookAlternative>? AlternativeToBooks { get; set; }
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public int AddedBy { get; set; }
+        public DateTime? PublishedDate { get; set; }
+        public string Description { get; set; }
+        public string CoverImageUrl { get; set; }
+        public float? Rating { get; set; }
+        public ICollection<BookTag> BookTags { get; set; }
+
+        public User User { get; set; } // Navigation property
     }
 
-    public class BookAlternative
-    {
-        public Guid Id { get; set; }
-        public Guid OriginalBookId { get; set; }
-        public Guid AlternativeBookId { get; set; }
-        public Book? OriginalBook { get; set; }
-        public Book? AlternativeBook { get; set; }
-        public ICollection<BookAlternativeUpvote>? BookAlternativeUpvotes { get; set; }
-    }
-
-    public class BookAlternativeUpvote
-    {
-        public Guid Id { get; set; }
-        public Guid BookAlternativeId { get; set; }
-        public BookAlternative? BookAlternative { get; set; }
-        public Guid UserId { get; set; }
-    }
 }
