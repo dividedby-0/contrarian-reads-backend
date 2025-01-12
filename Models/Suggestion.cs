@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public int BookId { get; set; }
         public int SuggestedBookId { get; set; }
-        public int SuggestedBy { get; set; }
+        public Guid SuggestedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Reason { get; set; }
 

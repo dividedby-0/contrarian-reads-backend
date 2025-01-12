@@ -12,7 +12,7 @@ using contrarian_reads_backend.Data;
 namespace contrarian_reads_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250111221129_InitialCreate")]
+    [Migration("20250112164034_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,8 +33,8 @@ namespace contrarian_reads_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AddedBy")
-                        .HasColumnType("int");
+                    b.Property<Guid>("AddedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Author")
                         .IsRequired()
@@ -96,8 +96,8 @@ namespace contrarian_reads_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CommentedBy")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CommentedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -147,8 +147,8 @@ namespace contrarian_reads_backend.Migrations
                     b.Property<int>("SuggestedBookId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SuggestedBy")
-                        .HasColumnType("int");
+                    b.Property<Guid>("SuggestedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -192,8 +192,8 @@ namespace contrarian_reads_backend.Migrations
                     b.Property<int>("SuggestionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UpvotedBy")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UpvotedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -207,11 +207,9 @@ namespace contrarian_reads_backend.Migrations
 
             modelBuilder.Entity("contrarian_reads_backend.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Bio")
                         .IsRequired()
@@ -258,8 +256,8 @@ namespace contrarian_reads_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ViewedBy")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ViewedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

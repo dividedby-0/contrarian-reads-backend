@@ -3,8 +3,8 @@
     public class CommentDTO
     {
         public int Id { get; set; }
-        public int SuggestionId { get; set; } // Might not need this on the frontend
-        public UserDTO User { get; set; } // User who made the comment
+        public int SuggestionId { get; set; }
+        public UserDTO User { get; set; }
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

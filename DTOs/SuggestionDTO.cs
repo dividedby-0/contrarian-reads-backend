@@ -7,7 +7,7 @@
         public BookDTO Book { get; set; }
         public int SuggestedBookId { get; set; }
         public BookDTO SuggestedBook { get; set; }
-        public int SuggestedByUserId { get; set; }
+        public Guid SuggestedByUserId { get; set; }
         public UserDTO SuggestedByUser { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Reason { get; set; }

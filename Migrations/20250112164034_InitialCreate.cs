@@ -28,8 +28,7 @@ namespace contrarian_reads_backend.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -50,7 +49,7 @@ namespace contrarian_reads_backend.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Author = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AddedBy = table.Column<int>(type: "int", nullable: false),
+                    AddedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PublishedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CoverImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -75,7 +74,7 @@ namespace contrarian_reads_backend.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EntityId = table.Column<int>(type: "int", nullable: false),
-                    ViewedBy = table.Column<int>(type: "int", nullable: false),
+                    ViewedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -123,7 +122,7 @@ namespace contrarian_reads_backend.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookId = table.Column<int>(type: "int", nullable: false),
                     SuggestedBookId = table.Column<int>(type: "int", nullable: false),
-                    SuggestedBy = table.Column<int>(type: "int", nullable: false),
+                    SuggestedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -157,7 +156,7 @@ namespace contrarian_reads_backend.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SuggestionId = table.Column<int>(type: "int", nullable: false),
-                    CommentedBy = table.Column<int>(type: "int", nullable: false),
+                    CommentedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -193,7 +192,7 @@ namespace contrarian_reads_backend.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SuggestionId = table.Column<int>(type: "int", nullable: false),
-                    UpvotedBy = table.Column<int>(type: "int", nullable: false),
+                    UpvotedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
