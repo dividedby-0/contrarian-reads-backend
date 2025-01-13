@@ -7,6 +7,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var dbPassword = Environment.GetEnvironmentVariable("MSSQL_DB_PASSWORD");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 
 builder.Services.AddAutoMapper(cfg =>
 {
@@ -25,13 +26,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins(builder.Configuration["Frontend:Url"])
+            policy.WithOrigins("http://localhost:4200")
                    .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
-
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 
 if (string.IsNullOrEmpty(jwtSecret))
 {
@@ -60,7 +60,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
