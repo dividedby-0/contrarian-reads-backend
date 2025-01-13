@@ -12,7 +12,7 @@ using contrarian_reads_backend.Data;
 namespace contrarian_reads_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250112164034_InitialCreate")]
+    [Migration("20250112225902_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -27,11 +27,9 @@ namespace contrarian_reads_backend.Migrations
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Book", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AddedBy")
                         .HasColumnType("uniqueidentifier");
@@ -73,8 +71,8 @@ namespace contrarian_reads_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("TagId")
                         .HasColumnType("int");
@@ -134,8 +132,8 @@ namespace contrarian_reads_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -144,8 +142,8 @@ namespace contrarian_reads_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SuggestedBookId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("SuggestedBookId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SuggestedBy")
                         .HasColumnType("uniqueidentifier");

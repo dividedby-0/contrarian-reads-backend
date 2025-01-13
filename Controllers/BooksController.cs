@@ -36,13 +36,18 @@ namespace contrarian_reads_backend.Controllers
 
         // GET: api/Books/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookDTO>> GetBook(int id)
+        public async Task<ActionResult<BookDTO>> GetBook(string id)
         {
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                return BadRequest("Invalid GUID format.");
+            }
+
             var book = await _context.Books
                 .Include(b => b.BookTags)
                 .ThenInclude(bt => bt.Tag)
                 .Include(b => b.User)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == guidId);
 
             if (book == null)
             {
@@ -59,7 +64,8 @@ namespace contrarian_reads_backend.Controllers
         {
             var book = _mapper.Map<Book>(bookDTO);
 
-            book.AddedBy = Guid.NewGuid();
+            book.Id = Guid.NewGuid();
+            book.AddedBy = Guid.Parse("D8BCA0F9-77E6-4E1A-86CF-334F5C4E9C9D"); //TODO remove hardcoded guid
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
@@ -71,7 +77,8 @@ namespace contrarian_reads_backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, BookDTO bookDTO)
         {
-            if (id != bookDTO.Id)
+            var guidId = Guid.Parse(id.ToString());
+            if (guidId != bookDTO.Id)
             {
                 return BadRequest();
             }
