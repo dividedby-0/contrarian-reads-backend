@@ -2,8 +2,8 @@
 {
     public class Upvote
     {
-        public int Id { get; set; }
-        public int SuggestionId { get; set; }
+        public Guid Id { get; set; }
+        public Guid SuggestionId { get; set; }
         public Guid UpvotedBy { get; set; }
         public DateTime CreatedAt { get; set; }
 

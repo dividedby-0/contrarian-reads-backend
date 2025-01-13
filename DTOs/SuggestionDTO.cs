@@ -2,7 +2,7 @@
 {
     public class SuggestionDTO
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Guid BookId { get; set; }
         public BookDTO Book { get; set; }
         public Guid SuggestedBookId { get; set; }

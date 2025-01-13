@@ -15,8 +15,7 @@ namespace contrarian_reads_backend.Migrations
                 name: "Tags",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -48,7 +47,7 @@ namespace contrarian_reads_backend.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Author = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AddedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AddedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PublishedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CoverImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -62,17 +61,16 @@ namespace contrarian_reads_backend.Migrations
                         column: x => x.AddedBy,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Views",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityId = table.Column<int>(type: "int", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ViewedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -84,17 +82,16 @@ namespace contrarian_reads_backend.Migrations
                         column: x => x.ViewedBy,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "BookTags",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TagId = table.Column<int>(type: "int", nullable: false)
+                    TagId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -104,7 +101,7 @@ namespace contrarian_reads_backend.Migrations
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BookTags_Tags_TagId",
                         column: x => x.TagId,
@@ -117,8 +114,7 @@ namespace contrarian_reads_backend.Migrations
                 name: "Suggestions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SuggestedBookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SuggestedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -152,14 +148,13 @@ namespace contrarian_reads_backend.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SuggestionId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SuggestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CommentedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ParentId = table.Column<int>(type: "int", nullable: true)
+                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -188,9 +183,8 @@ namespace contrarian_reads_backend.Migrations
                 name: "Upvotes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SuggestionId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SuggestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpvotedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },

@@ -2,7 +2,7 @@
 {
     public class Suggestion
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Guid BookId { get; set; }
         public Guid SuggestedBookId { get; set; }
         public Guid SuggestedBy { get; set; }
