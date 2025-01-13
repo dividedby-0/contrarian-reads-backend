@@ -65,7 +65,7 @@ namespace contrarian_reads_backend.Controllers
             var book = _mapper.Map<Book>(bookDTO);
 
             book.Id = Guid.NewGuid();
-            book.AddedBy = Guid.Parse("D8BCA0F9-77E6-4E1A-86CF-334F5C4E9C9D"); //TODO remove hardcoded User guid
+            book.AddedBy = Guid.Parse("A4D8E6F7-2A5D-4E6C-91A3-B123F6E789D1"); //TODO remove hardcoded User guid
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
