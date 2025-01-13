@@ -10,5 +10,3 @@
         public string Bio { get; set; }
     }
 }
-
-

@@ -14,6 +14,10 @@ public class AutoMapperProfile : Profile
         CreateMap<User, UserDTO>();
         CreateMap<UserDTO, User>();
 
+        CreateMap<CreateUserDTO, User>();
+
+        CreateMap<LoginDTO, User>();
+
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
     }

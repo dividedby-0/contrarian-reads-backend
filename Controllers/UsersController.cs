@@ -51,14 +51,15 @@ namespace contrarian_reads_backend.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> CreateUser(UserDTO userDTO)
+        public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == userDTO.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == createUserDTO.Email))
             {
                 return BadRequest("A user with this email already exists.");
             }
 
-            var user = _mapper.Map<User>(userDTO);
+            var user = _mapper.Map<User>(createUserDTO);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserDTO.Password);
 
             user.Id = Guid.NewGuid();
 

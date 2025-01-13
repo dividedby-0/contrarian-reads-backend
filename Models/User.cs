@@ -9,6 +9,7 @@
         public DateTime CreatedAt { get; set; }
         public string Bio { get; set; }
         public bool IsAdmin { get; set; }
+        public string PasswordHash { get; set; }
 
         public ICollection<Book> Books { get; set; }
         public ICollection<Suggestion> Suggestions { get; set; }
