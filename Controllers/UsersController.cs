@@ -31,9 +31,14 @@ namespace contrarian_reads_backend.Controllers
 
         // GET: api/Users/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDTO>> GetUser(Guid id)
+        public async Task<ActionResult<UserDTO>> GetUser(string id)
         {
-            var user = await _context.Users.FindAsync(id);
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                return BadRequest("Invalid GUID format.");
+            }
+
+            var user = await _context.Users.FindAsync(guidId);
 
             if (user == null)
             {
@@ -61,6 +66,55 @@ namespace contrarian_reads_backend.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, _mapper.Map<UserDTO>(user));
+        }
+
+        // PUT: api/Users/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UserDTO userDTO)
+        {
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                return BadRequest("Invalid GUID format.");
+            }
+
+            var existingUser = await _context.Users.FindAsync(guidId);
+
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            existingUser.Username = userDTO.Username;
+            existingUser.Email = userDTO.Email;
+            existingUser.ProfilePictureUrl = userDTO.ProfilePictureUrl;
+            existingUser.Bio = userDTO.Bio;
+
+            await _context.SaveChangesAsync();
+
+            var updatedUserDTO = _mapper.Map<UserDTO>(existingUser);
+            return Ok(updatedUserDTO);
+        }
+
+        // DELETE: api/Users/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                return BadRequest("Invalid GUID format.");
+            }
+
+            var user = await _context.Users.FindAsync(guidId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

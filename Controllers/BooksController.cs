@@ -65,7 +65,7 @@ namespace contrarian_reads_backend.Controllers
             var book = _mapper.Map<Book>(bookDTO);
 
             book.Id = Guid.NewGuid();
-            book.AddedBy = Guid.Parse("D8BCA0F9-77E6-4E1A-86CF-334F5C4E9C9D"); //TODO remove hardcoded guid
+            book.AddedBy = Guid.Parse("D8BCA0F9-77E6-4E1A-86CF-334F5C4E9C9D"); //TODO remove hardcoded User guid
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
@@ -75,22 +75,53 @@ namespace contrarian_reads_backend.Controllers
 
         // PUT: api/Books/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, BookDTO bookDTO)
+        public async Task<IActionResult> UpdateBook(string id, BookDTO bookDTO)
         {
-            var guidId = Guid.Parse(id.ToString());
-            if (guidId != bookDTO.Id)
+            if (!Guid.TryParse(id, out var guidId))
             {
-                return BadRequest();
+                return BadRequest("Invalid GUID format.");
             }
 
-            return StatusCode(StatusCodes.Status501NotImplemented);
+            var existingBook = await _context.Books.FindAsync(guidId);
+
+            if (existingBook == null)
+            {
+                return NotFound();
+            }
+
+            existingBook.Title = bookDTO.Title;
+            existingBook.Author = bookDTO.Author;
+            existingBook.PublishedDate = bookDTO.PublishedDate;
+            existingBook.Description = bookDTO.Description;
+            existingBook.CoverImageUrl = bookDTO.CoverImageUrl;
+            existingBook.Rating = bookDTO.Rating;
+
+            await _context.SaveChangesAsync();
+
+            var updatedBookDTO = _mapper.Map<BookDTO>(existingBook);
+            return Ok(updatedBookDTO);
         }
 
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(int id)
+        public async Task<IActionResult> DeleteBook(string id)
         {
-            return StatusCode(StatusCodes.Status501NotImplemented);
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                return BadRequest("Invalid GUID format.");
+            }
+
+            var book = await _context.Books.FindAsync(guidId);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
