@@ -1,0 +1,143 @@
+Table "dbo"."Tags" {
+  "Id" uniqueidentifier [not null]
+  "Name" nvarchar(MAX) [not null]
+
+  Indexes {
+    Id [pk]
+  }
+}
+
+Table "dbo"."Users" {
+  "Id" uniqueidentifier [not null]
+  "Username" nvarchar(MAX) [not null]
+  "Email" nvarchar(MAX) [not null]
+  "ProfilePictureUrl" nvarchar(MAX) [not null]
+  "CreatedAt" datetime2 [not null]
+  "Bio" nvarchar(MAX) [not null]
+  "IsAdmin" bit [not null]
+  "PasswordHash" nvarchar(MAX) [not null, default: `N,[object Object]`]
+
+  Indexes {
+    Id [pk]
+  }
+}
+
+Table "dbo"."__EFMigrationsHistory" {
+  "MigrationId" nvarchar(150) [not null]
+  "ProductVersion" nvarchar(32) [not null]
+
+  Indexes {
+    MigrationId [pk]
+  }
+}
+
+Table "dbo"."Books" {
+  "Id" uniqueidentifier [not null]
+  "Title" nvarchar(MAX) [not null]
+  "Author" nvarchar(MAX) [not null]
+  "AddedBy" uniqueidentifier
+  "PublishedDate" datetime2
+  "Description" nvarchar(MAX) [not null]
+  "CoverImageUrl" nvarchar(MAX) [not null]
+  "Rating" real
+
+  Indexes {
+    Id [pk]
+    AddedBy [name: "IX_Books_AddedBy"]
+  }
+}
+
+Table "dbo"."Suggestions" {
+  "Id" uniqueidentifier [not null]
+  "BookId" uniqueidentifier [not null]
+  "SuggestedBookId" uniqueidentifier [not null]
+  "SuggestedBy" uniqueidentifier [not null]
+  "CreatedAt" datetime2 [not null]
+  "Reason" nvarchar(MAX) [not null]
+
+  Indexes {
+    Id [pk]
+    BookId [name: "IX_Suggestions_BookId"]
+    SuggestedBookId [name: "IX_Suggestions_SuggestedBookId"]
+    SuggestedBy [name: "IX_Suggestions_SuggestedBy"]
+  }
+}
+
+Table "dbo"."Upvotes" {
+  "Id" uniqueidentifier [not null]
+  "SuggestionId" uniqueidentifier [not null]
+  "UpvotedBy" uniqueidentifier [not null]
+  "CreatedAt" datetime2 [not null]
+
+  Indexes {
+    Id [pk]
+    (SuggestionId, UpvotedBy) [unique, name: "IX_Upvotes_SuggestionId_UpvotedBy"]
+    UpvotedBy [name: "IX_Upvotes_UpvotedBy"]
+  }
+}
+
+Table "dbo"."Views" {
+  "Id" uniqueidentifier [not null]
+  "EntityType" nvarchar(MAX) [not null]
+  "EntityId" uniqueidentifier [not null]
+  "ViewedBy" uniqueidentifier [not null]
+  "CreatedAt" datetime2 [not null]
+
+  Indexes {
+    Id [pk]
+    ViewedBy [name: "IX_Views_ViewedBy"]
+  }
+}
+
+Table "dbo"."BookTags" {
+  "Id" uniqueidentifier [not null]
+  "BookId" uniqueidentifier [not null]
+  "TagId" uniqueidentifier [not null]
+
+  Indexes {
+    Id [pk]
+    BookId [name: "IX_BookTags_BookId"]
+    TagId [name: "IX_BookTags_TagId"]
+  }
+}
+
+Table "dbo"."Comments" {
+  "Id" uniqueidentifier [not null]
+  "SuggestionId" uniqueidentifier [not null]
+  "CommentedBy" uniqueidentifier [not null]
+  "Content" nvarchar(MAX) [not null]
+  "CreatedAt" datetime2 [not null]
+  "UpdatedAt" datetime2
+  "ParentId" uniqueidentifier
+
+  Indexes {
+    Id [pk]
+    CommentedBy [name: "IX_Comments_CommentedBy"]
+    ParentId [name: "IX_Comments_ParentId"]
+    SuggestionId [name: "IX_Comments_SuggestionId"]
+  }
+}
+
+Ref "FK_Books_Users_AddedBy":"dbo"."Users"."Id" < "dbo"."Books"."AddedBy" [delete: set null]
+
+Ref "FK_Suggestions_Books_BookId":"dbo"."Books"."Id" < "dbo"."Suggestions"."BookId" [delete: cascade]
+
+Ref "FK_Suggestions_Books_SuggestedBookId":"dbo"."Books"."Id" < "dbo"."Suggestions"."SuggestedBookId"
+
+Ref "FK_Suggestions_Users_SuggestedBy":"dbo"."Users"."Id" < "dbo"."Suggestions"."SuggestedBy"
+
+Ref "FK_Upvotes_Suggestions_SuggestionId":"dbo"."Suggestions"."Id" < "dbo"."Upvotes"."SuggestionId" [delete: cascade]
+
+Ref "FK_Upvotes_Users_UpvotedBy":"dbo"."Users"."Id" < "dbo"."Upvotes"."UpvotedBy"
+
+Ref "FK_Views_Users_ViewedBy":"dbo"."Users"."Id" < "dbo"."Views"."ViewedBy"
+
+Ref "FK_BookTags_Books_BookId":"dbo"."Books"."Id" < "dbo"."BookTags"."BookId"
+
+Ref "FK_BookTags_Tags_TagId":"dbo"."Tags"."Id" < "dbo"."BookTags"."TagId" [delete: cascade]
+
+Ref "FK_Comments_Comments_ParentId":"dbo"."Comments"."Id" < "dbo"."Comments"."ParentId"
+
+Ref "FK_Comments_Suggestions_SuggestionId":"dbo"."Suggestions"."Id" < "dbo"."Comments"."SuggestionId" [delete: cascade]
+
+Ref "FK_Comments_Users_CommentedBy":"dbo"."Users"."Id" < "dbo"."Comments"."CommentedBy"

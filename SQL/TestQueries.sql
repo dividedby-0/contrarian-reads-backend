@@ -26,3 +26,21 @@ SELECT TOP (1000) [Id]
       ,[UserId]
       ,[ApplicationUserId]
   FROM [contrarian-reads-backend].[dbo].[BookAlternativeUpvotes]
+
+-- list all books that have a suggestion
+
+SELECT DISTINCT
+    b.Id AS BookId,
+    b.Title,
+    b.Author,
+    b.AddedBy,
+    b.PublishedDate,
+    b.Description,
+    b.CoverImageUrl,
+    b.Rating
+FROM
+    [contrarian-reads].dbo.Books b
+INNER JOIN
+    [contrarian-reads].dbo.Suggestions s
+ON
+    b.Id = s.BookId;
