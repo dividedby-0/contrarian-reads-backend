@@ -18,6 +18,11 @@ ContrarianReads is a crowdsourced platform that helps readers explore diverse pe
 The platform is designed to combat the ["filter bubble"](https://www.wikiwand.com/en/articles/Filter_bubble) effect—where algorithms and personal choices limit exposure to differing viewpoints—by actively encouraging readers to explore perspectives that challenge their existing beliefs. By facilitating access to well-reasoned opposing arguments, ContrarianReads helps users broaden their intellectual horizons and develop a more nuanced understanding of complex topics.
 
 <figure>
+  <img src="./Screenshots/contrarian-reads-main-page.png" alt="Main screen">
+  <figcaption>Main screen</figcaption>
+</figure>
+
+<figure>
   <img src="./Screenshots/db-diagram.png" alt="Database diagram">
   <figcaption>Database ERD diagram</figcaption>
 </figure>

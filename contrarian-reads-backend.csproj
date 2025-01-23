@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Screenshots\" />
     <Folder Include="SQL\" />
   </ItemGroup>
 
