@@ -34,6 +34,14 @@ namespace contrarian_reads_backend.Controllers
             return Ok(suggestionDTOs);
         }
 
+        // GET: api/Suggestions/count
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetSuggestionCount()
+        {
+            var count = await _context.Suggestions.CountAsync();
+            return Ok(count);
+        }
+
         // GET: api/Suggestions/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SuggestionDTO>> GetSuggestion(string id)
