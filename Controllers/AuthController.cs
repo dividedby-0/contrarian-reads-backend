@@ -56,7 +56,7 @@ namespace contrarian_reads_backend.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new { Token = tokenHandler.WriteToken(token) });
+            return Ok(new { Token = tokenHandler.WriteToken(token), UserId = user.Id });
         }
     }
 }

@@ -11,6 +11,8 @@ public class AutoMapperProfile : Profile
         CreateMap<Book, BookDTO>();
         CreateMap<BookDTO, Book>();
 
+        CreateMap<CreateBookDTO, Book>();
+
         CreateMap<User, UserDTO>();
         CreateMap<UserDTO, User>();
 
@@ -20,5 +22,7 @@ public class AutoMapperProfile : Profile
 
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
+
+        CreateMap<CreateSuggestionDTO, Suggestion>();
     }
 }

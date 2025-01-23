@@ -60,30 +60,46 @@ namespace contrarian_reads_backend.Controllers
 
         // POST: api/Suggestions
         [HttpPost]
-        public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(SuggestionDTO suggestionDTO)
+        public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
         {
+            //var bookId = Guid.Parse(createSuggestionDTO.BookId);
+            //var suggestedBookId = Guid.Parse(createSuggestionDTO.SuggestedBookId);
+
+            if (!Guid.TryParse(createSuggestionDTO.BookId, out var bookId) ||
+                !Guid.TryParse(createSuggestionDTO.SuggestedBookId, out var suggestedBookId))
+            {
+                return BadRequest("Invalid BookId or SuggestedBookId format.");
+            }
+
             if (await _context.Suggestions.AnyAsync(s =>
-                s.BookId == suggestionDTO.BookId &&
-                s.SuggestedBookId == suggestionDTO.SuggestedBookId))
+                s.BookId == bookId &&
+                s.SuggestedBookId == suggestedBookId))
             {
                 return Conflict("A suggestion with this Book and SuggestedBook already exists.");
             }
 
-            var book = await _context.Books.FindAsync(suggestionDTO.BookId);
-            var suggestedBook = await _context.Books.FindAsync(suggestionDTO.SuggestedBookId);
-            var suggestedByUser = await _context.Users.FindAsync(suggestionDTO.SuggestedByUserId);
+            if (!Guid.TryParse(createSuggestionDTO.SuggestedByUserId, out var suggestedByUserId))
+            {
+                return BadRequest("Invalid SuggestedByUserId format.");
+            }
+
+            var book = await _context.Books.FindAsync(bookId);
+            var suggestedBook = await _context.Books.FindAsync(suggestedBookId);
+            var suggestedByUser = await _context.Users.FindAsync(suggestedByUserId);
 
             if (book == null || suggestedBook == null || suggestedByUser == null)
             {
                 return NotFound("Book, SuggestedBook, or SuggestedByUser not found.");
             }
 
-            var suggestion = _mapper.Map<Suggestion>(suggestionDTO);
+            var suggestion = _mapper.Map<Suggestion>(createSuggestionDTO);
             suggestion.Id = Guid.NewGuid();
             suggestion.Book = book;
             suggestion.SuggestedBook = suggestedBook;
             suggestion.SuggestedByUser = suggestedByUser;
             suggestion.CreatedAt = DateTime.UtcNow;
+            suggestion.Reason = createSuggestionDTO.Reason;
+            suggestion.Upvotes = new List<Upvote>();
 
             _context.Suggestions.Add(suggestion);
             await _context.SaveChangesAsync();

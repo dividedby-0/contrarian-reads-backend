@@ -60,17 +60,30 @@ namespace contrarian_reads_backend.Controllers
 
         // POST: api/Books
         [HttpPost]
-        public async Task<ActionResult<BookDTO>> CreateBook(BookDTO bookDTO)
+        public async Task<ActionResult<BookDTO>> CreateBook(CreateBookDTO createBookDTO)
         {
-            var book = _mapper.Map<Book>(bookDTO);
+            var existingBook = await _context.Books
+                .FirstOrDefaultAsync(b =>
+                    b.Title.ToLower() == createBookDTO.Title.ToLower() &&
+                    b.Author.ToLower() == createBookDTO.Author.ToLower());
 
-            book.Id = Guid.NewGuid();
-            book.AddedBy = Guid.Parse("A4D8E6F7-2A5D-4E6C-91A3-B123F6E789D1"); //TODO remove hardcoded User guid
+            if (existingBook != null)
+            {
+                var existingBookDTO = _mapper.Map<BookDTO>(existingBook);
+                return Ok(existingBookDTO);
+            }
+            else
+            {
+                var book = _mapper.Map<Book>(createBookDTO);
 
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
+                book.Id = Guid.NewGuid();
+                book.AddedBy = Guid.Parse(createBookDTO.AddedBy);
 
-            return CreatedAtAction("GetBook", new { id = book.Id }, book);
+                _context.Books.Add(book);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetBook", new { id = book.Id }, book);
+            }
         }
 
         // PUT: api/Books/5
@@ -91,10 +104,8 @@ namespace contrarian_reads_backend.Controllers
 
             existingBook.Title = bookDTO.Title;
             existingBook.Author = bookDTO.Author;
-            existingBook.PublishedDate = bookDTO.PublishedDate;
             existingBook.Description = bookDTO.Description;
             existingBook.CoverImageUrl = bookDTO.CoverImageUrl;
-            existingBook.Rating = bookDTO.Rating;
 
             await _context.SaveChangesAsync();
 
