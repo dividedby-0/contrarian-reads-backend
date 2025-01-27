@@ -51,7 +51,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasIndex("AddedBy");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.BookTag", b =>
@@ -72,7 +72,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("BookTags");
+                    b.ToTable("BookTags", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Comment", b =>
@@ -108,7 +108,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasIndex("SuggestionId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Suggestion", b =>
@@ -141,7 +141,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasIndex("SuggestedBy");
 
-                    b.ToTable("Suggestions");
+                    b.ToTable("Suggestions", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Tag", b =>
@@ -156,7 +156,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Upvote", b =>
@@ -181,7 +181,7 @@ namespace contrarian_reads_backend.Migrations
                     b.HasIndex("SuggestionId", "UpvotedBy")
                         .IsUnique();
 
-                    b.ToTable("Upvotes");
+                    b.ToTable("Upvotes", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.User", b =>
@@ -218,7 +218,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.View", b =>
@@ -244,7 +244,7 @@ namespace contrarian_reads_backend.Migrations
 
                     b.HasIndex("ViewedBy");
 
-                    b.ToTable("Views");
+                    b.ToTable("Views", (string)null);
                 });
 
             modelBuilder.Entity("contrarian_reads_backend.Models.Book", b =>

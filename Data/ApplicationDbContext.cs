@@ -128,6 +128,5 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(v => v.ViewedBy)
             // When a View is deleted, prevent deletion of the EntityId and User
             .OnDelete(DeleteBehavior.Restrict);
-
     }
 }

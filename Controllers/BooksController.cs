@@ -134,5 +134,129 @@ namespace contrarian_reads_backend.Controllers
 
             return NoContent();
         }
+
+        // GET: api/Books/search?searchTerm=&pageSize=10
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, int pageSize = 20, string? lastEvaluatedKey = null)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                //TODO: reimplement pagination
+                var bookIds = await _context.Books
+                    .Select(b => b.Id)
+                    .Union(_context.Suggestions
+                        .Include(s => s.SuggestedBook)
+                        .Select(s => s.BookId))
+                    .Distinct()
+                    .OrderBy(id => id)
+                    //.Take(pageSize)
+                    .ToListAsync();
+
+                if (bookIds == null || !bookIds.Any())
+                {
+                    return NotFound("No books found matching the search term.");
+                }
+
+                var books = await _context.Books
+                    .Where(b => bookIds.Contains(b.Id))
+                    .Include(b => b.BookTags)
+                        .ThenInclude(bt => bt.Tag)
+                    .Include(b => b.User)
+                    .ToListAsync();
+
+                var suggestions = await _context.Suggestions
+                    .Where(s => bookIds.Contains(s.BookId))
+                    .Include(s => s.SuggestedBook)
+                    .Include(s => s.SuggestedByUser)
+                    .ToListAsync();
+
+                var groupedSuggestions = suggestions
+                    .GroupBy(s => s.BookId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => _mapper.Map<List<SuggestionDTO>>(g.ToList())
+                    );
+
+                var booksWithSuggestions = books
+                    .Select(b => new BookWithSuggestionsDTO
+                    {
+                        Book = _mapper.Map<BookDTO>(b),
+                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionDTO>()
+                    })
+                    .Where(bws => bws.Suggestions.Any())
+                    .ToList();
+
+                string? nextLastEvaluatedKey = null;
+                if (bookIds.Count == pageSize)
+                {
+                    nextLastEvaluatedKey = bookIds.LastOrDefault().ToString();
+                }
+
+                return Ok(new
+                {
+                    BooksWithSuggestions = booksWithSuggestions,
+                    NextLastEvaluatedKey = nextLastEvaluatedKey
+                });
+            }
+            else
+            {
+                var bookIds = await _context.Books
+                    .Where(b => b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm))
+                    .Select(b => b.Id)
+                    .Union(_context.Suggestions
+                        .Include(s => s.SuggestedBook)
+                        .Where(s => s.SuggestedBook.Title.Contains(searchTerm) || s.SuggestedBook.Author.Contains(searchTerm))
+                        .Select(s => s.BookId))
+                    .Distinct()
+                    .OrderBy(id => id)
+                    .ToListAsync();
+
+                if (bookIds == null || !bookIds.Any())
+                {
+                    return NotFound("No books found matching the search term.");
+                }
+
+                var books = await _context.Books
+                    .Where(b => bookIds.Contains(b.Id))
+                    .Include(b => b.BookTags)
+                        .ThenInclude(bt => bt.Tag)
+                    .Include(b => b.User)
+                    .ToListAsync();
+
+                var suggestions = await _context.Suggestions
+                    .Where(s => bookIds.Contains(s.BookId))
+                    .Include(s => s.SuggestedBook)
+                    .Include(s => s.SuggestedByUser)
+                    .ToListAsync();
+
+                var groupedSuggestions = suggestions
+                    .GroupBy(s => s.BookId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => _mapper.Map<List<SuggestionDTO>>(g.ToList())
+                    );
+
+                var booksWithSuggestions = books
+                    .Select(b => new BookWithSuggestionsDTO
+                    {
+                        Book = _mapper.Map<BookDTO>(b),
+                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionDTO>()
+                    })
+                    .Where(bws => bws.Suggestions.Any())
+                    .ToList();
+
+                string? nextLastEvaluatedKey = null;
+                if (bookIds.Count == pageSize)
+                {
+                    nextLastEvaluatedKey = bookIds.LastOrDefault().ToString();
+                }
+
+                return Ok(new
+                {
+                    BooksWithSuggestions = booksWithSuggestions,
+                    NextLastEvaluatedKey = nextLastEvaluatedKey
+                });
+            }
+        }
     }
 }

@@ -70,9 +70,6 @@ namespace contrarian_reads_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
         {
-            //var bookId = Guid.Parse(createSuggestionDTO.BookId);
-            //var suggestedBookId = Guid.Parse(createSuggestionDTO.SuggestedBookId);
-
             if (!Guid.TryParse(createSuggestionDTO.BookId, out var bookId) ||
                 !Guid.TryParse(createSuggestionDTO.SuggestedBookId, out var suggestedBookId))
             {
@@ -113,54 +110,54 @@ namespace contrarian_reads_backend.Controllers
             await _context.SaveChangesAsync();
 
             var createdSuggestionDTO = _mapper.Map<SuggestionDTO>(suggestion);
-            createdSuggestionDTO.Book = _mapper.Map<BookDTO>(book);
             createdSuggestionDTO.SuggestedBook = _mapper.Map<BookDTO>(suggestedBook);
             createdSuggestionDTO.SuggestedByUser = _mapper.Map<UserDTO>(suggestedByUser);
 
             return CreatedAtAction("GetSuggestion", new { id = suggestion.Id }, createdSuggestionDTO);
         }
 
+        //TODO: reimplement suggestion put
         // PUT: api/Suggestions/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSuggestion(string id, SuggestionDTO suggestionDTO)
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return BadRequest("Invalid GUID format.");
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateSuggestion(string id, SuggestionDTO suggestionDTO)
+        //{
+        //    if (!Guid.TryParse(id, out var guidId))
+        //    {
+        //        return BadRequest("Invalid GUID format.");
+        //    }
 
-            if (await _context.Suggestions.AnyAsync(s =>
-                s.Id != guidId &&
-                s.BookId == suggestionDTO.BookId &&
-                s.SuggestedBookId == suggestionDTO.SuggestedBookId))
-            {
-                return Conflict("A suggestion with this Book and SuggestedBook already exists.");
-            }
+        //    if (await _context.Suggestions.AnyAsync(s =>
+        //        s.Id != guidId &&
+        //        s.BookId == suggestionDTO.BookId &&
+        //        s.SuggestedBookId == suggestionDTO.SuggestedBookId))
+        //    {
+        //        return Conflict("A suggestion with this Book and SuggestedBook already exists.");
+        //    }
 
-            var existingSuggestion = await _context.Suggestions
-                .Include(s => s.Book)
-                .Include(s => s.SuggestedBook)
-                .Include(s => s.SuggestedByUser)
-                .FirstOrDefaultAsync(s => s.Id == guidId);
+        //    var existingSuggestion = await _context.Suggestions
+        //        .Include(s => s.Book)
+        //        .Include(s => s.SuggestedBook)
+        //        .Include(s => s.SuggestedByUser)
+        //        .FirstOrDefaultAsync(s => s.Id == guidId);
 
-            if (existingSuggestion == null)
-            {
-                return NotFound();
-            }
+        //    if (existingSuggestion == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            existingSuggestion.Reason = suggestionDTO.Reason;
-            existingSuggestion.BookId = suggestionDTO.BookId;
-            existingSuggestion.SuggestedBookId = suggestionDTO.SuggestedBookId;
+        //    existingSuggestion.Reason = suggestionDTO.Reason;
+        //    existingSuggestion.BookId = suggestionDTO.BookId;
+        //    existingSuggestion.SuggestedBookId = suggestionDTO.SuggestedBookId;
 
-            await _context.SaveChangesAsync();
+        //    await _context.SaveChangesAsync();
 
-            var updatedSuggestionDTO = _mapper.Map<SuggestionDTO>(existingSuggestion);
-            updatedSuggestionDTO.Book = _mapper.Map<BookDTO>(existingSuggestion.Book);
-            updatedSuggestionDTO.SuggestedBook = _mapper.Map<BookDTO>(existingSuggestion.SuggestedBook);
-            updatedSuggestionDTO.SuggestedByUser = _mapper.Map<UserDTO>(existingSuggestion.SuggestedByUser);
+        //    var updatedSuggestionDTO = _mapper.Map<SuggestionDTO>(existingSuggestion);
+        //    updatedSuggestionDTO.Book = _mapper.Map<BookDTO>(existingSuggestion.Book);
+        //    updatedSuggestionDTO.SuggestedBook = _mapper.Map<BookDTO>(existingSuggestion.SuggestedBook);
+        //    updatedSuggestionDTO.SuggestedByUser = _mapper.Map<UserDTO>(existingSuggestion.SuggestedByUser);
 
-            return Ok(updatedSuggestionDTO);
-        }
+        //    return Ok(updatedSuggestionDTO);
+        //}
 
         // DELETE: api/Suggestions/5
         [HttpDelete("{id}")]
