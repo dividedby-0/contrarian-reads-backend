@@ -168,20 +168,22 @@ namespace contrarian_reads_backend.Controllers
                     .Where(s => bookIds.Contains(s.BookId))
                     .Include(s => s.SuggestedBook)
                     .Include(s => s.SuggestedByUser)
+                    .Include(s => s.Comments)
+                        .ThenInclude(c => c.User)
                     .ToListAsync();
 
                 var groupedSuggestions = suggestions
                     .GroupBy(s => s.BookId)
                     .ToDictionary(
                         g => g.Key,
-                        g => _mapper.Map<List<SuggestionDTO>>(g.ToList())
+                        g => _mapper.Map<List<SuggestionWithCommentsDTO>>(g.ToList())
                     );
 
                 var booksWithSuggestions = books
                     .Select(b => new BookWithSuggestionsDTO
                     {
                         Book = _mapper.Map<BookDTO>(b),
-                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionDTO>()
+                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionWithCommentsDTO>()
                     })
                     .Where(bws => bws.Suggestions.Any())
                     .ToList();
@@ -227,20 +229,22 @@ namespace contrarian_reads_backend.Controllers
                     .Where(s => bookIds.Contains(s.BookId))
                     .Include(s => s.SuggestedBook)
                     .Include(s => s.SuggestedByUser)
+                    .Include(s => s.Comments)
+                        .ThenInclude(c => c.User)
                     .ToListAsync();
 
                 var groupedSuggestions = suggestions
                     .GroupBy(s => s.BookId)
                     .ToDictionary(
                         g => g.Key,
-                        g => _mapper.Map<List<SuggestionDTO>>(g.ToList())
+                        g => _mapper.Map<List<SuggestionWithCommentsDTO>>(g.ToList())
                     );
 
                 var booksWithSuggestions = books
                     .Select(b => new BookWithSuggestionsDTO
                     {
                         Book = _mapper.Map<BookDTO>(b),
-                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionDTO>()
+                        Suggestions = groupedSuggestions.ContainsKey(b.Id) ? groupedSuggestions[b.Id] : new List<SuggestionWithCommentsDTO>()
                     })
                     .Where(bws => bws.Suggestions.Any())
                     .ToList();

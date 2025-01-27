@@ -23,6 +23,8 @@ public class AutoMapperProfile : Profile
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
 
+        CreateMap<Suggestion, SuggestionWithCommentsDTO>();
+
         CreateMap<CreateSuggestionDTO, Suggestion>();
     }
 }

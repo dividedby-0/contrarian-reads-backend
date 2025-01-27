@@ -15,5 +15,4 @@
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Upvote> Upvotes { get; set; }
     }
-
 }

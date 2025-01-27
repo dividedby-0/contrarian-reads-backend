@@ -3,6 +3,6 @@
     public class BookWithSuggestionsDTO
     {
         public BookDTO Book { get; set; }
-        public List<SuggestionDTO> Suggestions { get; set; }
+        public List<SuggestionWithCommentsDTO> Suggestions { get; set; }
     }
 }
