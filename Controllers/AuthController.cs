@@ -1,5 +1,5 @@
 ﻿using contrarian_reads_backend.Data;
-using contrarian_reads_backend.DTOs;
+using contrarian_reads_backend.Services.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

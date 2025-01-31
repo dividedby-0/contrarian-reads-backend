@@ -1,8 +1,8 @@
 ﻿namespace contrarian_reads_backend.Profiles;
 
 using AutoMapper;
-using contrarian_reads_backend.DTOs;
 using contrarian_reads_backend.Models;
+using contrarian_reads_backend.Services.DTOs;
 
 public class AutoMapperProfile : Profile
 {

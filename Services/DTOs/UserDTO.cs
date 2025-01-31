@@ -1,4 +1,4 @@
-﻿namespace contrarian_reads_backend.DTOs
+﻿namespace contrarian_reads_backend.Services.DTOs
 {
     public class UserDTO
     {

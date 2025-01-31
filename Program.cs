@@ -1,5 +1,6 @@
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Profiles;
+using contrarian_reads_backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,6 +21,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer($"Server=localhost,1433;Database=contrarian-reads;User Id=SA;Password={dbPassword};TrustServerCertificate=true;"));
+
+builder.Services.AddScoped<ISuggestionService, SuggestionService>();
 
 builder.Services.AddCors(options =>
 {

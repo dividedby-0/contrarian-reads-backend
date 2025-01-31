@@ -1,4 +1,4 @@
-﻿namespace contrarian_reads_backend.DTOs
+﻿namespace contrarian_reads_backend.Services.DTOs
 {
     public class CommentDTO
     {
@@ -11,6 +11,7 @@
 
         // For handling replies
         public Guid? ParentId { get; set; }
+
         public IEnumerable<CommentDTO> Replies { get; set; }
     }
 }
