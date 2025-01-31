@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Models;
+using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,111 +12,46 @@ namespace contrarian_reads_backend.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public UsersController(ApplicationDbContext context, IMapper mapper)
+        public UsersController(IUserService userService)
         {
-            _context = context;
-            _mapper = mapper;
+            _userService = userService;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        public async Task<ActionResult<List<UserDTO>>> GetUsers()
         {
-            var users = await _context.Users.ToListAsync();
-            var userDTOs = _mapper.Map<List<UserDTO>>(users);
-            return Ok(userDTOs);
+            return await _userService.GetUsers();
         }
 
         // GET: api/Users/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(string id)
         {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return BadRequest("Invalid GUID format.");
-            }
-
-            var user = await _context.Users.FindAsync(guidId);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var userDTO = _mapper.Map<UserDTO>(user);
-            return Ok(userDTO);
+            return await _userService.GetUser(id);
         }
 
         // POST: api/Users
         [HttpPost]
         public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == createUserDTO.Email))
-            {
-                return BadRequest("A user with this email already exists.");
-            }
-
-            var user = _mapper.Map<User>(createUserDTO);
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserDTO.Password);
-
-            user.Id = Guid.NewGuid();
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, _mapper.Map<UserDTO>(user));
+            return await _userService.CreateUser(createUserDTO);
         }
 
         // PUT: api/Users/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UserDTO userDTO)
+        public async Task<ActionResult<UserDTO>> UpdateUser(string id, CreateUserDTO createUserDTO)
         {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return BadRequest("Invalid GUID format.");
-            }
-
-            var existingUser = await _context.Users.FindAsync(guidId);
-
-            if (existingUser == null)
-            {
-                return NotFound();
-            }
-
-            existingUser.Username = userDTO.Username;
-            existingUser.Email = userDTO.Email;
-            existingUser.ProfilePictureUrl = userDTO.ProfilePictureUrl;
-            existingUser.Bio = userDTO.Bio;
-
-            await _context.SaveChangesAsync();
-
-            var updatedUserDTO = _mapper.Map<UserDTO>(existingUser);
-            return Ok(updatedUserDTO);
+            return await _userService.UpdateUser(id, createUserDTO);
         }
 
         // DELETE: api/Users/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<ActionResult<UserDTO>> DeleteUser(string id)
         {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return BadRequest("Invalid GUID format.");
-            }
-
-            var user = await _context.Users.FindAsync(guidId);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return await _userService.DeleteUser(id);
         }
     }
 }
