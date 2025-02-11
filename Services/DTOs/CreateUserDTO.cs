@@ -1,32 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace contrarian_reads_backend.Services.DTOs
-{
-    public class CreateUserDTO
-    {
-        [Required]
-        public Guid Id { get; set; }
+namespace contrarian_reads_backend.Services.DTOs;
 
-        [Required]
-        public string Username { get; set; }
-
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        public string ProfilePictureUrl { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
-        [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
-
-        public string Bio { get; set; }
-    }
-}
+public record CreateUserDTO(
+    [property: Required] Guid Id,
+    [property: Required] string Username,
+    [property: Required]
+    [property: EmailAddress]
+    string Email,
+    string? ProfilePictureUrl,
+    DateTime CreatedAt,
+    [property: Required]
+    [property: StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+    [property: DataType(DataType.Password)]
+    string Password,
+    [property: DataType(DataType.Password)]
+    [property: Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+    string ConfirmPassword,
+    string? Bio);

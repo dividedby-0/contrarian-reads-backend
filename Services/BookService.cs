@@ -147,13 +147,12 @@ public class BookService : IBookService
                 );
 
             var booksWithSuggestions = books
-                .Select(b => new BookWithSuggestionsDTO
-                {
-                    Book = _mapper.Map<BookDTO>(b),
-                    Suggestions = groupedSuggestions.ContainsKey(b.Id)
-                        ? groupedSuggestions[b.Id]
+                .Select(b => new BookWithSuggestionsDTO(
+                    _mapper.Map<BookDTO>(b),
+                    groupedSuggestions.TryGetValue(b.Id, out var suggestions)
+                        ? suggestions
                         : new List<SuggestionWithCommentsDTO>()
-                })
+                ))
                 .Where(bws => bws.Suggestions.Any())
                 .ToList();
 
@@ -206,13 +205,12 @@ public class BookService : IBookService
                 );
 
             var booksWithSuggestions = books
-                .Select(b => new BookWithSuggestionsDTO
-                {
-                    Book = _mapper.Map<BookDTO>(b),
-                    Suggestions = groupedSuggestions.ContainsKey(b.Id)
-                        ? groupedSuggestions[b.Id]
+                .Select(b => new BookWithSuggestionsDTO(
+                    _mapper.Map<BookDTO>(b),
+                    groupedSuggestions.TryGetValue(b.Id, out var suggestions)
+                        ? suggestions
                         : new List<SuggestionWithCommentsDTO>()
-                })
+                ))
                 .Where(bws => bws.Suggestions.Any())
                 .ToList();
 

@@ -1,13 +1,16 @@
-﻿namespace contrarian_reads_backend.Services.DTOs
+﻿namespace contrarian_reads_backend.Services.DTOs;
+
+public record SuggestionWithCommentsDTO(
+    Guid Id,
+    BookDTO? SuggestedBook,
+    UserDTO? SuggestedByUser,
+    DateTime CreatedAt,
+    string Reason,
+    int UpvoteCount,
+    List<CommentDTO> Comments
+)
 {
-    public class SuggestionWithCommentsDTO
+    public SuggestionWithCommentsDTO() : this(Guid.Empty, null, null, default, "", 0, new List<CommentDTO>())
     {
-        public Guid Id { get; set; }
-        public BookDTO? SuggestedBook { get; set; }
-        public UserDTO? SuggestedByUser { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string Reason { get; set; }
-        public int UpvoteCount { get; set; }
-        public List<CommentDTO> Comments { get; set; }
     }
 }

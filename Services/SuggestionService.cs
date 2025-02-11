@@ -5,120 +5,103 @@ using contrarian_reads_backend.Services.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace contrarian_reads_backend.Services
+namespace contrarian_reads_backend.Services;
+
+public class SuggestionService : ISuggestionService
 {
-    public class SuggestionService : ISuggestionService
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public SuggestionService(ApplicationDbContext context, IMapper mapper)
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        _context = context;
+        _mapper = mapper;
+    }
 
-        public SuggestionService(ApplicationDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
+    public async Task<ActionResult<SuggestionDTO>> GetSuggestion(string id)
 
-        public async Task<ActionResult<SuggestionDTO>> GetSuggestion(string id)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
 
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return new BadRequestObjectResult("Invalid GUID format.");
-            }
+        var suggestion = await _context.Suggestions
+            .Include(s => s.Book)
+            .Include(s => s.SuggestedBook)
+            .Include(s => s.SuggestedByUser)
+            .FirstOrDefaultAsync(s => s.Id == guidId);
 
-            var suggestion = await _context.Suggestions
-                .Include(s => s.Book)
-                .Include(s => s.SuggestedBook)
-                .Include(s => s.SuggestedByUser)
-                .FirstOrDefaultAsync(s => s.Id == guidId);
+        if (suggestion == null) return new NotFoundObjectResult("Suggestion not found.");
 
-            if (suggestion == null)
-            {
-                return new NotFoundObjectResult("Suggestion not found.");
-            }
+        return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
+    }
 
-            return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
-        }
+    public async Task<ActionResult<int>> GetSuggestionCount()
+    {
+        var count = await _context.Suggestions.CountAsync();
+        return new OkObjectResult(count);
+    }
 
-        public async Task<ActionResult<int>> GetSuggestionCount()
-        {
-            var count = await _context.Suggestions.CountAsync();
-            return new OkObjectResult(count);
-        }
+    public async Task<ActionResult<List<SuggestionDTO>>> GetSuggestions()
+    {
+        var suggestions = await _context.Suggestions
+            .Include(s => s.Book)
+            .Include(s => s.SuggestedBook)
+            .Include(s => s.SuggestedByUser)
+            .ToListAsync();
 
-        public async Task<ActionResult<List<SuggestionDTO>>> GetSuggestions()
-        {
-            var suggestions = await _context.Suggestions
-                .Include(s => s.Book)
-                .Include(s => s.SuggestedBook)
-                .Include(s => s.SuggestedByUser)
-                .ToListAsync();
+        return new OkObjectResult(_mapper.Map<IEnumerable<SuggestionDTO>>(suggestions));
+    }
 
-            return new OkObjectResult(_mapper.Map<IEnumerable<SuggestionDTO>>(suggestions));
-        }
+    public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
+    {
+        if (!Guid.TryParse(createSuggestionDTO.BookId, out var bookId) ||
+            !Guid.TryParse(createSuggestionDTO.SuggestedBookId, out var suggestedBookId))
+            return new BadRequestObjectResult("Invalid BookId or SuggestedBookId format.");
 
-        public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
-        {
-            if (!Guid.TryParse(createSuggestionDTO.BookId, out var bookId) ||
-                !Guid.TryParse(createSuggestionDTO.SuggestedBookId, out var suggestedBookId))
-            {
-                return new BadRequestObjectResult("Invalid BookId or SuggestedBookId format.");
-            }
-
-            if (await _context.Suggestions.AnyAsync(s =>
+        if (await _context.Suggestions.AnyAsync(s =>
                 s.BookId == bookId &&
                 s.SuggestedBookId == suggestedBookId))
-            {
-                return new ConflictObjectResult("A suggestion with this Book and SuggestedBook already exists.");
-            }
+            return new ConflictObjectResult("A suggestion with this Book and SuggestedBook already exists.");
 
-            if (!Guid.TryParse(createSuggestionDTO.SuggestedByUserId, out var suggestedByUserId))
-            {
-                return new BadRequestObjectResult("Invalid SuggestedByUserId format.");
-            }
+        if (!Guid.TryParse(createSuggestionDTO.SuggestedByUserId, out var suggestedByUserId))
+            return new BadRequestObjectResult("Invalid SuggestedByUserId format.");
 
-            var book = await _context.Books.FindAsync(bookId);
-            var suggestedBook = await _context.Books.FindAsync(suggestedBookId);
-            var suggestedByUser = await _context.Users.FindAsync(suggestedByUserId);
+        var book = await _context.Books.FindAsync(bookId);
+        var suggestedBook = await _context.Books.FindAsync(suggestedBookId);
+        var suggestedByUser = await _context.Users.FindAsync(suggestedByUserId);
 
-            if (book == null || suggestedBook == null || suggestedByUser == null)
-            {
-                return new NotFoundObjectResult("Book, SuggestedBook, or SuggestedByUser not found.");
-            }
+        if (book == null || suggestedBook == null || suggestedByUser == null)
+            return new NotFoundObjectResult("Book, SuggestedBook, or SuggestedByUser not found.");
 
-            var suggestion = _mapper.Map<Suggestion>(createSuggestionDTO);
-            suggestion.Id = Guid.NewGuid();
-            suggestion.Book = book;
-            suggestion.SuggestedBook = suggestedBook;
-            suggestion.SuggestedByUser = suggestedByUser;
-            suggestion.CreatedAt = DateTime.UtcNow;
-            suggestion.Reason = createSuggestionDTO.Reason;
-            suggestion.Upvotes = new List<Upvote>();
+        var suggestion = _mapper.Map<Suggestion>(createSuggestionDTO);
+        suggestion.Id = Guid.NewGuid();
+        suggestion.Book = book;
+        suggestion.SuggestedBook = suggestedBook;
+        suggestion.SuggestedByUser = suggestedByUser;
+        suggestion.CreatedAt = DateTime.UtcNow;
+        suggestion.Reason = createSuggestionDTO.Reason;
+        suggestion.Upvotes = new List<Upvote>();
 
-            _context.Suggestions.Add(suggestion);
-            await _context.SaveChangesAsync();
+        _context.Suggestions.Add(suggestion);
+        await _context.SaveChangesAsync();
 
-            var createdSuggestionDTO = _mapper.Map<SuggestionDTO>(suggestion);
-            createdSuggestionDTO.SuggestedBook = _mapper.Map<BookDTO>(suggestedBook);
-            createdSuggestionDTO.SuggestedByUser = _mapper.Map<UserDTO>(suggestedByUser);
+        var createdSuggestionDTO = new SuggestionDTO(
+            suggestion.Id,
+            _mapper.Map<BookDTO>(suggestedBook),
+            _mapper.Map<UserDTO>(suggestedByUser),
+            Reason: suggestion.Reason,
+            CreatedAt: suggestion.CreatedAt,
+            UpvoteCount: suggestion.Upvotes.Count
+        );
+        return new OkObjectResult(createdSuggestionDTO);
+    }
 
-            return new OkObjectResult(createdSuggestionDTO);
-        }
-
-        public async Task<ActionResult<SuggestionDTO>> DeleteSuggestion(string id)
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return new BadRequestObjectResult("Invalid GUID format.");
-            }
-            var suggestion = await _context.Suggestions.FindAsync(guidId);
-            if (suggestion == null)
-            {
-                return new NotFoundObjectResult("Suggestion not found.");
-            }
-            _context.Suggestions.Remove(suggestion);
-            await _context.SaveChangesAsync();
-            return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
-        }
+    public async Task<ActionResult<SuggestionDTO>> DeleteSuggestion(string id)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
+        var suggestion = await _context.Suggestions.FindAsync(guidId);
+        if (suggestion == null) return new NotFoundObjectResult("Suggestion not found.");
+        _context.Suggestions.Remove(suggestion);
+        await _context.SaveChangesAsync();
+        return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
     }
 }

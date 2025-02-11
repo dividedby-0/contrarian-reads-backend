@@ -1,15 +1,12 @@
-﻿namespace contrarian_reads_backend.Services.DTOs
-{
-    public class CreateSuggestionDTO
-    {
-        public string BookId { get; set; }
-        public BookDTO? Book { get; set; }
-        public string SuggestedBookId { get; set; }
-        public BookDTO? SuggestedBook { get; set; }
-        public string SuggestedByUserId { get; set; }
-        public UserDTO? SuggestedByUser { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string Reason { get; set; }
-        public int UpvoteCount { get; set; }
-    }
-}
+﻿namespace contrarian_reads_backend.Services.DTOs;
+
+public record CreateSuggestionDTO(
+    string BookId,
+    BookDTO? Book,
+    string SuggestedBookId,
+    BookDTO? SuggestedBook,
+    string SuggestedByUserId,
+    UserDTO? SuggestedByUser,
+    DateTime CreatedAt,
+    string Reason,
+    int UpvoteCount);

@@ -1,15 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace contrarian_reads_backend.Services.DTOs
-{
-    public class LoginDTO
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+namespace contrarian_reads_backend.Services.DTOs;
 
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-    }
-}
+public record LoginDTO(
+    [Required] [EmailAddress] string Email,
+    [Required]
+    [DataType(DataType.Password)]
+    string Password);
