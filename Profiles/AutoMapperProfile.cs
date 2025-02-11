@@ -1,8 +1,8 @@
-﻿namespace contrarian_reads_backend.Profiles;
-
-using AutoMapper;
+﻿using AutoMapper;
 using contrarian_reads_backend.Models;
 using contrarian_reads_backend.Services.DTOs;
+
+namespace contrarian_reads_backend.Profiles;
 
 public class AutoMapperProfile : Profile
 {
@@ -23,7 +23,8 @@ public class AutoMapperProfile : Profile
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
 
-        CreateMap<Suggestion, SuggestionWithCommentsDTO>();
+        CreateMap<Suggestion, SuggestionWithCommentsDTO>()
+            .ForMember(dest => dest.UpvoteCount, opt => opt.MapFrom(src => src.Upvotes.Count));
 
         CreateMap<CreateSuggestionDTO, Suggestion>();
     }

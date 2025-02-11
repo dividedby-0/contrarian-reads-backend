@@ -137,6 +137,7 @@ public class BookService : IBookService
                 .Include(s => s.SuggestedByUser)
                 .Include(s => s.Comments)
                 .ThenInclude(c => c.User)
+                .Include(s => s.Upvotes)
                 .ToListAsync();
 
             var groupedSuggestions = suggestions
@@ -195,6 +196,7 @@ public class BookService : IBookService
                 .Include(s => s.SuggestedByUser)
                 .Include(s => s.Comments)
                 .ThenInclude(c => c.User)
+                .Include(s => s.Upvotes)
                 .ToListAsync();
 
             var groupedSuggestions = suggestions
