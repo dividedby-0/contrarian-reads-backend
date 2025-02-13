@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ISuggestionService, SuggestionService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddCors(options =>
 {

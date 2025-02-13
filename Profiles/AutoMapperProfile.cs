@@ -27,5 +27,11 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.UpvoteCount, opt => opt.MapFrom(src => src.Upvotes.Count));
 
         CreateMap<CreateSuggestionDTO, Suggestion>();
+
+        CreateMap<CreateCommentDTO, CommentDTO>();
+        CreateMap<CreateCommentDTO, Comment>();
+
+        CreateMap<Comment, CommentDTO>();
+        CreateMap<CommentDTO, Comment>();
     }
 }
