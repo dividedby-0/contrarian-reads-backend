@@ -104,4 +104,33 @@ public class SuggestionService : ISuggestionService
         await _context.SaveChangesAsync();
         return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
     }
+
+    public async Task<ActionResult<SuggestionDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
+    {
+        if (!Guid.TryParse(suggestionId, out var guidSuggestionId))
+            return new BadRequestObjectResult("Invalid SuggestionId format.");
+
+        var existingUpvote = await _context.Upvotes
+            .FirstOrDefaultAsync(u => u.SuggestionId == guidSuggestionId && u.UpvotedBy == userId);
+
+        if (existingUpvote != null)
+        {
+            _context.Upvotes.Remove(existingUpvote);
+        }
+        else
+        {
+            var upvote = new Upvote
+            {
+                Id = Guid.NewGuid(),
+                SuggestionId = guidSuggestionId,
+                UpvotedBy = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Upvotes.Add(upvote);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return new OkObjectResult(guidSuggestionId);
+    }
 }
