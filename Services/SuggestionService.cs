@@ -40,6 +40,13 @@ public class SuggestionService : ISuggestionService
         return new OkObjectResult(count);
     }
 
+    public async Task<ActionResult<int>> GetUpvoteCount(string id)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
+        var count = await _context.Upvotes.CountAsync(u => u.SuggestionId == guidId);
+        return new OkObjectResult(count);
+    }
+
     public async Task<ActionResult<List<SuggestionDTO>>> GetSuggestions()
     {
         var suggestions = await _context.Suggestions

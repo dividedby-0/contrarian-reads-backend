@@ -11,6 +11,8 @@ public interface ISuggestionService
 
     Task<ActionResult<int>> GetSuggestionCount();
 
+    Task<ActionResult<int>> GetUpvoteCount(string id);
+
     Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO);
 
     //Task<ActionResult<SuggestionDTO>> UpdateSuggestion(string id, CreateSuggestionDTO suggestion);

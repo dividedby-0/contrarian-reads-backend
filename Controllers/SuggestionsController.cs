@@ -36,6 +36,13 @@ public class SuggestionsController : ControllerBase
         return await _suggestionService.GetSuggestion(id);
     }
 
+    // GET: api/Suggestions/5/upvotes
+    [HttpGet("{id}/upvotes")]
+    public async Task<ActionResult<int>> GetUpvoteCount(string id)
+    {
+        return await _suggestionService.GetUpvoteCount(id);
+    }
+
     // POST: api/Suggestions
     [HttpPost]
     public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
