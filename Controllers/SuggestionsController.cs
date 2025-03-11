@@ -15,8 +15,8 @@ public class SuggestionsController : ControllerBase
         _suggestionService = suggestionService;
     }
 
-    // GET: api/Suggestions
-    [HttpGet]
+    // GET: api/Suggestions/all
+    [HttpGet("all")]
     public async Task<ActionResult<List<SuggestionDTO>>> GetSuggestions()
     {
         return await _suggestionService.GetSuggestions();
@@ -29,11 +29,12 @@ public class SuggestionsController : ControllerBase
         return await _suggestionService.GetSuggestionCount();
     }
 
-    // GET: api/Suggestions/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<SuggestionDTO>> GetSuggestion(string id)
+    // GET: api/Suggestions?suggestionId=5&userId=1
+    [HttpGet]
+    public async Task<ActionResult<SuggestionResponseDTO>> GetSuggestion([FromQuery] string suggestionId,
+        [FromQuery] string? userId)
     {
-        return await _suggestionService.GetSuggestion(id);
+        return await _suggestionService.GetSuggestion(suggestionId, userId);
     }
 
     // GET: api/Suggestions/5/upvotes
@@ -103,12 +104,12 @@ public class SuggestionsController : ControllerBase
 
     // POST: api/Suggestions/5/upvote
     [HttpPost("{suggestionId}/upvote")]
-    public async Task<ActionResult<SuggestionDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
+    public async Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
     {
         var result = await _suggestionService.UpvoteSuggestion(suggestionId, userId);
 
-        if (result.Result is ObjectResult objectResult && objectResult.StatusCode == StatusCodes.Status409Conflict)
-            return Conflict(objectResult.Value);
+        if (result.Result is ObjectResult objectResult && objectResult.StatusCode == StatusCodes.Status400BadRequest)
+            return BadRequest(objectResult.Value);
 
         return result;
     }

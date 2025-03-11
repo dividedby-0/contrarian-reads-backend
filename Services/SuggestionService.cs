@@ -18,22 +18,6 @@ public class SuggestionService : ISuggestionService
         _mapper = mapper;
     }
 
-    public async Task<ActionResult<SuggestionDTO>> GetSuggestion(string id)
-
-    {
-        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
-
-        var suggestion = await _context.Suggestions
-            .Include(s => s.Book)
-            .Include(s => s.SuggestedBook)
-            .Include(s => s.SuggestedByUser)
-            .FirstOrDefaultAsync(s => s.Id == guidId);
-
-        if (suggestion == null) return new NotFoundObjectResult("Suggestion not found.");
-
-        return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
-    }
-
     public async Task<ActionResult<int>> GetSuggestionCount()
     {
         var count = await _context.Suggestions.CountAsync();
@@ -112,7 +96,7 @@ public class SuggestionService : ISuggestionService
         return new OkObjectResult(_mapper.Map<SuggestionDTO>(suggestion));
     }
 
-    public async Task<ActionResult<SuggestionDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
+    public async Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
     {
         if (!Guid.TryParse(suggestionId, out var guidSuggestionId))
             return new BadRequestObjectResult("Invalid SuggestionId format.");
@@ -120,7 +104,9 @@ public class SuggestionService : ISuggestionService
         var existingUpvote = await _context.Upvotes
             .FirstOrDefaultAsync(u => u.SuggestionId == guidSuggestionId && u.UpvotedBy == userId);
 
-        if (existingUpvote != null)
+        var upvoteAlreadyExists = existingUpvote != null;
+
+        if (upvoteAlreadyExists)
         {
             _context.Upvotes.Remove(existingUpvote);
         }
@@ -138,6 +124,31 @@ public class SuggestionService : ISuggestionService
 
         await _context.SaveChangesAsync();
 
-        return new OkObjectResult(guidSuggestionId);
+        return new OkObjectResult(new UpvoteResponseDTO(guidSuggestionId, !upvoteAlreadyExists));
+    }
+
+    public async Task<ActionResult<SuggestionResponseDTO>> GetSuggestion(string id, string userId)
+
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
+
+        var suggestion = await _context.Suggestions
+            .Include(s => s.Book)
+            .Include(s => s.SuggestedBook)
+            .Include(s => s.SuggestedByUser)
+            .FirstOrDefaultAsync(s => s.Id == guidId);
+
+        if (suggestion == null) return new NotFoundObjectResult("Suggestion not found.");
+
+
+        var existingUpvote = await _context.Upvotes
+            .FirstOrDefaultAsync(u => u.SuggestionId == guidId && u.UpvotedBy == Guid.Parse(userId));
+
+        var suggestionResponseDTO = _mapper.Map<SuggestionResponseDTO>(suggestion) with
+        {
+            upvoteAlreadyExists = existingUpvote != null
+        };
+
+        return new OkObjectResult(suggestionResponseDTO);
     }
 }

@@ -5,7 +5,7 @@ namespace contrarian_reads_backend.Services;
 
 public interface ISuggestionService
 {
-    Task<ActionResult<SuggestionDTO>> GetSuggestion(string id);
+    Task<ActionResult<SuggestionResponseDTO>> GetSuggestion(string id, string userId);
 
     Task<ActionResult<List<SuggestionDTO>>> GetSuggestions();
 
@@ -19,5 +19,5 @@ public interface ISuggestionService
 
     Task<ActionResult<SuggestionDTO>> DeleteSuggestion(string id);
 
-    Task<ActionResult<SuggestionDTO>> UpvoteSuggestion(string suggestionId, Guid userId);
+    Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId);
 }

@@ -22,6 +22,7 @@ public class AutoMapperProfile : Profile
 
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
+        CreateMap<Suggestion, SuggestionResponseDTO>();
 
         CreateMap<Suggestion, SuggestionWithCommentsDTO>()
             .ForMember(dest => dest.UpvoteCount, opt => opt.MapFrom(src => src.Upvotes.Count));
