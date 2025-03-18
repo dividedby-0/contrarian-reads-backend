@@ -2,6 +2,7 @@
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace contrarian_reads_backend.Controllers;
@@ -36,6 +37,7 @@ public class BooksController : ControllerBase
     }
 
     // POST: api/Books
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BookDTO>> CreateBook(CreateBookDTO createBookDTO)
     {

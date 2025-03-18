@@ -1,5 +1,6 @@
 ﻿using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace contrarian_reads_backend.Controllers;
@@ -23,6 +24,7 @@ public class CommentsController : ControllerBase
     }
 
     // POST: api/Comments
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<CommentDTO>> CreateComment(CreateCommentDTO createCommentDTO)
     {

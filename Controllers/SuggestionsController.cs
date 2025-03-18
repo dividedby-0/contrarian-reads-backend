@@ -1,5 +1,6 @@
 ﻿using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace contrarian_reads_backend.Controllers;
@@ -16,6 +17,7 @@ public class SuggestionsController : ControllerBase
     }
 
     // GET: api/Suggestions/all
+    [Authorize]
     [HttpGet("all")]
     public async Task<ActionResult<List<SuggestionDTO>>> GetSuggestions()
     {
@@ -45,6 +47,7 @@ public class SuggestionsController : ControllerBase
     }
 
     // POST: api/Suggestions
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<SuggestionDTO>> CreateSuggestion(CreateSuggestionDTO createSuggestionDTO)
     {
@@ -95,6 +98,7 @@ public class SuggestionsController : ControllerBase
     //}
 
     // DELETE: api/Suggestions/5
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSuggestion(string id)
     {
@@ -103,6 +107,7 @@ public class SuggestionsController : ControllerBase
     }
 
     // POST: api/Suggestions/5/upvote
+    [Authorize]
     [HttpPost("{suggestionId}/upvote")]
     public async Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
     {
