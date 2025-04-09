@@ -13,4 +13,6 @@ public record SuggestionWithCommentsDTO(
     public SuggestionWithCommentsDTO() : this(Guid.Empty, null, null, default, "", 0, new List<CommentDTO>())
     {
     }
+
+    public bool UserHasUpvoted { get; set; }
 }

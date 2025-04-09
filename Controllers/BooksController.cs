@@ -60,9 +60,10 @@ public class BooksController : ControllerBase
 
     // GET: api/Books/search?searchTerm=&pageSize=10
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, int pageSize = 20,
+    public async Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, string? userId,
+        int pageSize = 20,
         string? lastEvaluatedKey = null)
     {
-        return await _bookService.SearchBooks(searchTerm, pageSize, lastEvaluatedKey);
+        return await _bookService.SearchBooks(searchTerm, userId, pageSize, lastEvaluatedKey);
     }
 }

@@ -46,6 +46,19 @@ public class SuggestionsController : ControllerBase
         return await _suggestionService.GetUpvoteCount(id);
     }
 
+    // POST: api/Suggestions/5/upvote
+    [Authorize]
+    [HttpPost("{suggestionId}/upvote")]
+    public async Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
+    {
+        var result = await _suggestionService.UpvoteSuggestion(suggestionId, userId);
+
+        if (result.Result is ObjectResult objectResult && objectResult.StatusCode == StatusCodes.Status400BadRequest)
+            return BadRequest(objectResult.Value);
+
+        return result;
+    }
+
     // POST: api/Suggestions
     [Authorize]
     [HttpPost]
@@ -104,18 +117,5 @@ public class SuggestionsController : ControllerBase
     {
         await _suggestionService.DeleteSuggestion(id);
         return NoContent();
-    }
-
-    // POST: api/Suggestions/5/upvote
-    [Authorize]
-    [HttpPost("{suggestionId}/upvote")]
-    public async Task<ActionResult<UpvoteResponseDTO>> UpvoteSuggestion(string suggestionId, Guid userId)
-    {
-        var result = await _suggestionService.UpvoteSuggestion(suggestionId, userId);
-
-        if (result.Result is ObjectResult objectResult && objectResult.StatusCode == StatusCodes.Status400BadRequest)
-            return BadRequest(objectResult.Value);
-
-        return result;
     }
 }

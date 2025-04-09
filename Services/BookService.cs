@@ -105,9 +105,11 @@ public class BookService : IBookService
         return new NoContentResult();
     }
 
-    public async Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, int pageSize = 20,
+    public async Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, string? userId,
+        int pageSize = 20,
         string? lastEvaluatedKey = null)
     {
+        // default bookgrid in main page
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
             //TODO: reimplement pagination
@@ -144,7 +146,12 @@ public class BookService : IBookService
                 .GroupBy(s => s.BookId)
                 .ToDictionary(
                     g => g.Key,
-                    g => _mapper.Map<List<SuggestionWithCommentsDTO>>(g.ToList())
+                    g => g.ToList().Select(s =>
+                    {
+                        var suggestionDto = _mapper.Map<SuggestionWithCommentsDTO>(s);
+                        suggestionDto.UserHasUpvoted = s.Upvotes.Any(u => u.UpvotedBy == Guid.Parse(userId));
+                        return suggestionDto;
+                    }).ToList()
                 );
 
             var booksWithSuggestions = books
@@ -168,6 +175,7 @@ public class BookService : IBookService
         }
         else
         {
+            // if searchTerm entered
             var bookIds = await _context.Books
                 .Where(b => b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm))
                 .Select(b => b.Id)
@@ -203,7 +211,12 @@ public class BookService : IBookService
                 .GroupBy(s => s.BookId)
                 .ToDictionary(
                     g => g.Key,
-                    g => _mapper.Map<List<SuggestionWithCommentsDTO>>(g.ToList())
+                    g => g.ToList().Select(s =>
+                    {
+                        var suggestionDto = _mapper.Map<SuggestionWithCommentsDTO>(s);
+                        suggestionDto.UserHasUpvoted = s.Upvotes.Any(u => u.UpvotedBy == Guid.Parse(userId));
+                        return suggestionDto;
+                    }).ToList()
                 );
 
             var booksWithSuggestions = books
