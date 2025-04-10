@@ -74,6 +74,9 @@ public class CommentService : ICommentService
         comment.CreatedAt = DateTime.UtcNow;
         comment.UpdatedAt = DateTime.UtcNow;
 
+        if (createCommentDTO.ParentId != null)
+            comment.ParentId = createCommentDTO.ParentId;
+
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
 

@@ -3,5 +3,6 @@
 public record CreateCommentDTO(
     Guid SuggestionId,
     string Content,
-    Guid CommentedByUserId
+    Guid CommentedByUserId,
+    Guid? ParentId
 );
