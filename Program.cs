@@ -1,5 +1,6 @@
 using System.Text;
 using contrarian_reads_backend.Data;
+using contrarian_reads_backend.Middleware;
 using contrarian_reads_backend.Profiles;
 using contrarian_reads_backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,12 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 var dbPassword = Environment.GetEnvironmentVariable("MSSQL_DB_PASSWORD");
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<AutoMapperProfile>(); },
     AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
@@ -55,16 +58,11 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 //app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseExceptionHandler();
 app.MapControllers();
 
 app.Run();
