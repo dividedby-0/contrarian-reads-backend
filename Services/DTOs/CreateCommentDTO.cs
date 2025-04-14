@@ -1,8 +1,13 @@
-﻿namespace contrarian_reads_backend.Services.DTOs;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace contrarian_reads_backend.Services.DTOs;
 
 public record CreateCommentDTO(
-    Guid SuggestionId,
+    [Required] Guid SuggestionId,
+    [Required]
+    [StringLength(150, ErrorMessage = "Comment content cannot be longer than 150 characters.")]
+    [MinLength(1)]
     string Content,
-    Guid CommentedByUserId,
+    [Required] Guid CommentedByUserId,
     Guid? ParentId
 );

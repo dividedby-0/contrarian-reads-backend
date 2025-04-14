@@ -1,12 +1,16 @@
-﻿namespace contrarian_reads_backend.Services.DTOs;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace contrarian_reads_backend.Services.DTOs;
 
 public record CommentDTO(
-    Guid Id,
+    [Required] Guid Id,
     Guid SuggestionId,
-    UserDTO User,
+    [Required] UserDTO User,
+    [Required]
+    [StringLength(150, MinimumLength = 1, ErrorMessage = "Comment content must be between 1 and 150 characters")]
     string Content,
     DateTime CreatedAt,
-    DateTime? UpdatedAt,
-    Guid? ParentId,
-    IEnumerable<CommentDTO> Replies
+    IEnumerable<CommentDTO> Replies,
+    DateTime? UpdatedAt = null,
+    Guid? ParentId = null
 );
