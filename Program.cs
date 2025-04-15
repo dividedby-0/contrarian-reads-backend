@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Middleware;
 using contrarian_reads_backend.Profiles;
@@ -55,6 +56,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            "global",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
 var app = builder.Build();
 
@@ -64,5 +77,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler();
 app.MapControllers();
+app.UseRateLimiter();
 
 app.Run();
