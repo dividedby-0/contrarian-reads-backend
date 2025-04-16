@@ -4,6 +4,7 @@ using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Middleware;
 using contrarian_reads_backend.Profiles;
 using contrarian_reads_backend.Services;
+using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

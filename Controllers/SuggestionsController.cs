@@ -1,5 +1,6 @@
 ﻿using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.DTOs;
+using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,49 +67,6 @@ public class SuggestionsController : ControllerBase
     {
         return await _suggestionService.CreateSuggestion(createSuggestionDTO);
     }
-
-    //TODO: reimplement suggestion put
-    // PUT: api/Suggestions/5
-    //[HttpPut("{id}")]
-    //public async Task<IActionResult> UpdateSuggestion(string id, SuggestionDTO suggestionDTO)
-    //{
-    //    if (!Guid.TryParse(id, out var guidId))
-    //    {
-    //        return BadRequest("Invalid GUID format.");
-    //    }
-
-    //    if (await _context.Suggestions.AnyAsync(s =>
-    //        s.Id != guidId &&
-    //        s.BookId == suggestionDTO.BookId &&
-    //        s.SuggestedBookId == suggestionDTO.SuggestedBookId))
-    //    {
-    //        return Conflict("A suggestion with this Book and SuggestedBook already exists.");
-    //    }
-
-    //    var existingSuggestion = await _context.Suggestions
-    //        .Include(s => s.Book)
-    //        .Include(s => s.SuggestedBook)
-    //        .Include(s => s.SuggestedByUser)
-    //        .FirstOrDefaultAsync(s => s.Id == guidId);
-
-    //    if (existingSuggestion == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    existingSuggestion.Reason = suggestionDTO.Reason;
-    //    existingSuggestion.BookId = suggestionDTO.BookId;
-    //    existingSuggestion.SuggestedBookId = suggestionDTO.SuggestedBookId;
-
-    //    await _context.SaveChangesAsync();
-
-    //    var updatedSuggestionDTO = _mapper.Map<SuggestionDTO>(existingSuggestion);
-    //    updatedSuggestionDTO.Book = _mapper.Map<BookDTO>(existingSuggestion.Book);
-    //    updatedSuggestionDTO.SuggestedBook = _mapper.Map<BookDTO>(existingSuggestion.SuggestedBook);
-    //    updatedSuggestionDTO.SuggestedByUser = _mapper.Map<UserDTO>(existingSuggestion.SuggestedByUser);
-
-    //    return Ok(updatedSuggestionDTO);
-    //}
 
     // DELETE: api/Suggestions/5
     [Authorize]

@@ -2,6 +2,7 @@
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Models;
 using contrarian_reads_backend.Services.DTOs;
+using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

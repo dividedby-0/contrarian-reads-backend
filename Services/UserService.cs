@@ -2,114 +2,94 @@
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Models;
 using contrarian_reads_backend.Services.DTOs;
+using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace contrarian_reads_backend.Services
+namespace contrarian_reads_backend.Services;
+
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public UserService(ApplicationDbContext context, IMapper mapper)
+
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        _context = context;
+        _mapper = mapper;
+    }
 
-        public UserService(ApplicationDbContext context, IMapper mapper)
+    public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)
+    {
+        if (await _context.Users.AnyAsync(u => u.Email == createUserDTO.Email))
+            return new BadRequestObjectResult("A user with this email already exists.");
 
-        {
-            _context = context;
-            _mapper = mapper;
-        }
+        var user = _mapper.Map<User>(createUserDTO);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserDTO.Password);
 
-        public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)
-        {
-            if (await _context.Users.AnyAsync(u => u.Email == createUserDTO.Email))
-            {
-                return new BadRequestObjectResult("A user with this email already exists.");
-            }
+        user.Id = Guid.NewGuid();
 
-            var user = _mapper.Map<User>(createUserDTO);
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserDTO.Password);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
 
-            user.Id = Guid.NewGuid();
+        return new OkObjectResult(_mapper.Map<UserDTO>(user));
+    }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+    public async Task<ActionResult<UserDTO>> DeleteUser(string id)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
 
-            return new OkObjectResult(_mapper.Map<UserDTO>(user));
-        }
+        var user = await _context.Users.FindAsync(guidId);
 
-        public async Task<ActionResult<UserDTO>> DeleteUser(string id)
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return new BadRequestObjectResult("Invalid GUID format.");
-            }
+        if (user == null) return new NotFoundObjectResult("User not found.");
 
-            var user = await _context.Users.FindAsync(guidId);
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
 
-            if (user == null)
-            {
-                return new NotFoundObjectResult("User not found.");
-            }
+        return new NoContentResult();
+    }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+    public async Task<ActionResult<UserDTO>> GetUser(string id)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
 
-            return new NoContentResult();
-        }
+        var user = await _context.Users.FindAsync(guidId);
 
-        public async Task<ActionResult<UserDTO>> GetUser(string id)
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return new BadRequestObjectResult("Invalid GUID format.");
-            }
+        if (user == null) return new NotFoundObjectResult("User not found.");
 
-            var user = await _context.Users.FindAsync(guidId);
+        var userDTO = _mapper.Map<UserDTO>(user);
+        return new OkObjectResult(userDTO);
+    }
 
-            if (user == null)
-            {
-                return new NotFoundObjectResult("User not found.");
-            }
+    public Task<ActionResult<int>> GetUserCount()
+    {
+        throw new NotImplementedException();
+    }
 
-            var userDTO = _mapper.Map<UserDTO>(user);
-            return new OkObjectResult(userDTO);
-        }
+    public async Task<ActionResult<List<UserDTO>>> GetUsers()
+    {
+        var users = await _context.Users.ToListAsync();
+        var userDTOs = _mapper.Map<List<UserDTO>>(users);
+        return new OkObjectResult(userDTOs);
+    }
 
-        public Task<ActionResult<int>> GetUserCount()
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<ActionResult<UserDTO>> UpdateUser(string id, CreateUserDTO createUserDTO)
+    {
+        if (!Guid.TryParse(id, out var guidId)) return new BadRequestObjectResult("Invalid GUID format.");
 
-        public async Task<ActionResult<List<UserDTO>>> GetUsers()
-        {
-            var users = await _context.Users.ToListAsync();
-            var userDTOs = _mapper.Map<List<UserDTO>>(users);
-            return new OkObjectResult(userDTOs);
-        }
+        var existingUser = await _context.Users.FindAsync(guidId);
 
-        public async Task<ActionResult<UserDTO>> UpdateUser(string id, CreateUserDTO createUserDTO)
-        {
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                return new BadRequestObjectResult("Invalid GUID format.");
-            }
+        if (existingUser == null) return new NotFoundObjectResult("User not found.");
 
-            var existingUser = await _context.Users.FindAsync(guidId);
+        existingUser.Username = createUserDTO.Username;
+        existingUser.Email = createUserDTO.Email;
+        existingUser.ProfilePictureUrl = createUserDTO.ProfilePictureUrl;
+        existingUser.Bio = createUserDTO.Bio;
 
-            if (existingUser == null)
-            {
-                return new NotFoundObjectResult("User not found.");
-            }
+        await _context.SaveChangesAsync();
 
-            existingUser.Username = createUserDTO.Username;
-            existingUser.Email = createUserDTO.Email;
-            existingUser.ProfilePictureUrl = createUserDTO.ProfilePictureUrl;
-            existingUser.Bio = createUserDTO.Bio;
-
-            await _context.SaveChangesAsync();
-
-            var updatedUserDTO = _mapper.Map<UserDTO>(existingUser);
-            return new OkObjectResult(updatedUserDTO);
-        }
+        var updatedUserDTO = _mapper.Map<UserDTO>(existingUser);
+        return new OkObjectResult(updatedUserDTO);
     }
 }

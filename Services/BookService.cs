@@ -2,6 +2,7 @@
 using contrarian_reads_backend.Data;
 using contrarian_reads_backend.Models;
 using contrarian_reads_backend.Services.DTOs;
+using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -157,7 +158,7 @@ public class BookService : IBookService
             var booksWithSuggestions = books
                 .Select(b => new BookWithSuggestionsDTO(
                     _mapper.Map<BookDTO>(b),
-                    groupedSuggestions.TryGetValue(b.Id, out var suggestions)
+                    groupedSuggestions.TryGetValue(b.Id, out List<SuggestionWithCommentsDTO>? suggestions)
                         ? suggestions
                         : new List<SuggestionWithCommentsDTO>()
                 ))

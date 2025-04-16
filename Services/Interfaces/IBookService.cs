@@ -1,7 +1,7 @@
 ﻿using contrarian_reads_backend.Services.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace contrarian_reads_backend.Services;
+namespace contrarian_reads_backend.Services.Interfaces;
 
 public interface IBookService
 {
