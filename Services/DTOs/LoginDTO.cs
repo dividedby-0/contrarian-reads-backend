@@ -7,6 +7,5 @@ public record LoginDTO(
     [EmailAddress(ErrorMessage = "Invalid email address")]
     string Email,
     [Required]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password is either too short or too long")]
     [DataType(DataType.Password)]
     string Password);
