@@ -31,6 +31,14 @@ public class UsersController : ControllerBase
         return await _userService.GetUser(id);
     }
 
+    // GET: api/Users/profile/{userId}
+    [Authorize]
+    [HttpGet("profile/{userId}")]
+    public async Task<ActionResult<UserProfileDTO>> GetUserProfile(string userId)
+    {
+        return await _userService.GetUserProfile(Guid.Parse(userId));
+    }
+
     // POST: api/Users
     [HttpPost]
     public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)

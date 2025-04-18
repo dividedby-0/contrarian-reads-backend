@@ -5,6 +5,7 @@ namespace contrarian_reads_backend.Services.DTOs;
 public record CommentDTO(
     [Required] Guid Id,
     Guid SuggestionId,
+    MinimalSuggestionDTO Suggestion,
     [Required] UserDTO User,
     [Required]
     [StringLength(150, MinimumLength = 1, ErrorMessage = "Comment content must be between 1 and 150 characters")]

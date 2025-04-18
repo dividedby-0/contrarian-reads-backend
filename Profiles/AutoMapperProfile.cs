@@ -23,6 +23,11 @@ public class AutoMapperProfile : Profile
         CreateMap<Suggestion, SuggestionDTO>();
         CreateMap<SuggestionDTO, Suggestion>();
         CreateMap<Suggestion, SuggestionResponseDTO>();
+        CreateMap<Suggestion, MinimalSuggestionDTO>()
+            .ForCtorParam("SuggestedbookTitle", opt => opt.MapFrom(src => src.SuggestedBook.Title))
+            .ForCtorParam("SuggestedbookAuthor", opt => opt.MapFrom(src => src.SuggestedBook.Author))
+            .ForCtorParam("MainbookTitle", opt => opt.MapFrom(src => src.Book.Title))
+            .ForCtorParam("MainbookAuthor", opt => opt.MapFrom(src => src.Book.Author));
 
         CreateMap<Suggestion, SuggestionWithCommentsDTO>()
             .ForMember(dest => dest.UpvoteCount, opt => opt.MapFrom(src => src.Upvotes.Count));

@@ -92,4 +92,36 @@ public class UserService : IUserService
         var updatedUserDTO = _mapper.Map<UserDTO>(existingUser);
         return new OkObjectResult(updatedUserDTO);
     }
+
+    public async Task<ActionResult<UserProfileDTO>> GetUserProfile(Guid userId)
+    {
+        var userProfileData = await _context.Users
+            .Include(u => u.Suggestions)
+            .ThenInclude(s => s.SuggestedBook)
+            .Include(u => u.Upvotes)
+            .ThenInclude(uv => uv.Suggestion)
+            .ThenInclude(s => s.SuggestedBook)
+            .Include(u => u.Comments)
+            .ThenInclude(c => c.Suggestion)
+            .ThenInclude(s => s.SuggestedBook)
+            .Include(u => u.Comments)
+            .ThenInclude(c => c.Suggestion)
+            .ThenInclude(s => s.Book)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (userProfileData == null)
+            return new NotFoundObjectResult("User not found");
+
+        return new OkObjectResult(new UserProfileDTO(
+            _mapper.Map<UserDTO>(userProfileData),
+            _mapper.Map<ICollection<SuggestionDTO>>(
+                userProfileData.Suggestions.OrderByDescending(s => s.CreatedAt)),
+            _mapper.Map<ICollection<SuggestionDTO>>(
+                userProfileData.Upvotes
+                    .Select(uv => uv.Suggestion)
+                    .OrderByDescending(s => s.CreatedAt)),
+            _mapper.Map<ICollection<CommentDTO>>(
+                userProfileData.Comments.OrderByDescending(c => c.CreatedAt))
+        ));
+    }
 }

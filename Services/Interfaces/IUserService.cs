@@ -11,6 +11,8 @@ public interface IUserService
 
     Task<ActionResult<int>> GetUserCount();
 
+    Task<ActionResult<UserProfileDTO>> GetUserProfile(Guid userId);
+
     Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO);
 
     Task<ActionResult<UserDTO>> UpdateUser(string id, CreateUserDTO createUserDTO);
