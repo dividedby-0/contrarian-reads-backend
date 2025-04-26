@@ -10,6 +10,7 @@ public record BookDTO(
     [Required]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "Author must be between 1 and 100 characters")]
     string Author,
+    DateTime CreatedAt,
     [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
     string? Description = null,
     [Url(ErrorMessage = "Invalid URL format for cover image")]

@@ -11,6 +11,6 @@ public interface IBookService
     Task<IActionResult> UpdateBook(string id, BookDTO bookDTO);
     Task<IActionResult> DeleteBook(string id);
 
-    Task<ActionResult<IEnumerable<BookDTO>>> SearchBooks(string? searchTerm, string userId, int pageSize = 20,
-        string? lastEvaluatedKey = null);
+    Task<ActionResult<SearchBooksResultDTO>> SearchBooks(string? searchTerm, string? userId, int pageSize,
+        DateTime? lastCreatedAt = null);
 }
