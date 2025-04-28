@@ -39,14 +39,16 @@ Work in progress. Will be soon available online.
 
 ## 🎨 Frontend
 
-- Built with **Angular** and styled using **Angular Material**
+- Find the frontend repo [here](https://github.com/dividedby-0/contrarian-reads-frontend)
+- Built with **Angular** using **Angular Material** for UI components
+- Standard Angular component-based architecture
+- Uses RxJS for reactive programming
 - Allows logged-in users to search for books, submit, upvote and comment alternative recommendations
 - Secure login and register system implementing **JWT authentication**
-- Route guards to prevent address tampering
+- Route guards to prevent address tampering using AuthGuard
 - User profile and user activity dashboard
 - Alternative book recommendations based on user activity
 - Hosted on **Netlify**
-- Find the frontend repo [here](https://github.com/dividedby-0/contrarian-reads-frontend)
 
 ## ⚙️ Backend
 
