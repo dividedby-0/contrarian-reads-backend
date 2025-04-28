@@ -50,10 +50,14 @@ Work in progress. Will be soon available online.
 
 ## ⚙️ Backend
 
-- Developed with **ASP.NET Core**
+- Developed with **C#**, **.NET Core** and **ASP.NET Core**
+- Service-based architecture with DTOs for data transfer
+- Uses **AutoMapper** for data mapping
 - Provides secure APIs for authentication using **JWT**
 - Books/recommendations/comments/upvotes management through secure RESTful endpoints
 - Password encryption using **BCrypt**
+- Strict input validation and rate limiting for login attempts
+- Global exception handling middleware
 - Data stored in **Microsoft SQL Server** database
 - Backend and database hosted on **Microsoft Azure**
 
