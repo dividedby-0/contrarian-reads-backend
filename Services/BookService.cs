@@ -115,22 +115,7 @@ public class BookService : IBookService
     {
         try
         {
-            var allBooksWithSuggestions = _context.Suggestions
-                .Select(s => s.BookId)
-                .Distinct();
-
-            var booksQuery = _context.Books
-                .Where(b => allBooksWithSuggestions.Contains(b.Id));
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-                booksQuery = booksQuery.Where(b =>
-                    b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm));
-
-            if (lastCreatedAt.HasValue) booksQuery = booksQuery.Where(b => b.CreatedAt < lastCreatedAt.Value);
-
-            booksQuery = booksQuery.OrderByDescending(b => b.CreatedAt).Take(pageSize);
-
-            var bookIds = await booksQuery.Select(b => b.Id).ToListAsync();
+            var bookIds = await GetFilteredBookIds(searchTerm, pageSize, lastCreatedAt);
 
             if (!bookIds.Any())
                 return new NotFoundObjectResult(
@@ -138,82 +123,122 @@ public class BookService : IBookService
                         ? "No books found."
                         : "No books found matching the search term.");
 
-            var books = await _context.Books
-                .Where(b => bookIds.Contains(b.Id))
-                .Include(b => b.BookTags).ThenInclude(bt => bt.Tag)
-                .Include(b => b.User)
-                .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync();
+            var books = await GetBooksWithDetails(bookIds);
+            var suggestions = await GetSuggestionsWithDetails(bookIds);
 
-            var suggestions = await _context.Suggestions
-                .Where(s => bookIds.Contains(s.BookId))
-                .Include(s => s.SuggestedBook)
-                .Include(s => s.SuggestedByUser)
-                .Include(s => s.Comments).ThenInclude(c => c.User)
-                .Include(s => s.Upvotes)
-                .ToListAsync();
+            var groupedSuggestions = MapSuggestions(suggestions, userId);
+            var booksWithSuggestions = MapBooksWithSuggestions(books, groupedSuggestions);
 
-            var groupedSuggestions = suggestions
-                .GroupBy(s => s.BookId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.ToList().Select(s =>
-                    {
-                        var suggestionDto = _mapper.Map<SuggestionWithCommentsDTO>(s);
-                        suggestionDto.UserHasUpvoted = !string.IsNullOrEmpty(userId) &&
-                                                       s.Upvotes.Any(u => u.UpvotedBy == Guid.Parse(userId));
-                        return suggestionDto;
-                    }).ToList()
-                );
-
-            var booksWithSuggestions = books
-                .Select(b => new BookWithSuggestionsDTO(
-                    _mapper.Map<BookDTO>(b),
-                    groupedSuggestions.TryGetValue(b.Id, out var bookSuggestions)
-                        ? bookSuggestions
-                        : new List<SuggestionWithCommentsDTO>()
-                ))
-                .Where(bws => bws.Suggestions.Any())
-                .ToList();
-
-            DateTime? nextCursor = null;
-            var hasMoreBooks = false;
-            var remainingBooksCount = 0;
-
-            if (booksWithSuggestions.Count < pageSize)
-            {
-                hasMoreBooks = false;
-                remainingBooksCount = 0;
-                nextCursor = null;
-            }
-            else
-            {
-                nextCursor = booksWithSuggestions.Min(bws => bws.Book.CreatedAt);
-
-                var remainingBooksQuery = _context.Books
-                    .Where(b => allBooksWithSuggestions.Contains(b.Id));
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                    remainingBooksQuery = remainingBooksQuery.Where(b =>
-                        b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm));
-                remainingBooksQuery = remainingBooksQuery.Where(b => b.CreatedAt < nextCursor.Value);
-
-                remainingBooksCount = await remainingBooksQuery.CountAsync();
-                hasMoreBooks = remainingBooksCount > 0;
-
-                if (!hasMoreBooks) nextCursor = null;
-            }
+            var pagination = await ComputePaginationInfo(searchTerm, pageSize, booksWithSuggestions, lastCreatedAt);
 
             return new OkObjectResult(new SearchBooksResultDTO
             {
                 BooksWithSuggestions = booksWithSuggestions,
-                HasMoreBooks = hasMoreBooks,
-                RemainingBooksCount = remainingBooksCount,
-                NextCursor = nextCursor
+                HasMoreBooks = pagination.HasMoreBooks,
+                RemainingBooksCount = pagination.RemainingBooksCount,
+                NextCursor = pagination.NextCursor
             });
         }
-        catch (Exception)
+        catch
         {
             return new StatusCodeResult(500);
         }
+    }
+
+    private async Task<List<Guid>> GetFilteredBookIds(string? searchTerm, int pageSize, DateTime? lastCreatedAt)
+    {
+        var suggestedBookIds = _context.Suggestions
+            .Select(s => s.BookId)
+            .Distinct();
+
+        var query = _context.Books
+            .Where(b => suggestedBookIds.Contains(b.Id));
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(b => b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm));
+
+        if (lastCreatedAt.HasValue)
+            query = query.Where(b => b.CreatedAt < lastCreatedAt.Value);
+
+        return await query
+            .OrderByDescending(b => b.CreatedAt)
+            .Take(pageSize)
+            .Select(b => b.Id)
+            .ToListAsync();
+    }
+
+    private async Task<List<Book>> GetBooksWithDetails(List<Guid> bookIds)
+    {
+        return await _context.Books
+            .Where(b => bookIds.Contains(b.Id))
+            .Include(b => b.BookTags).ThenInclude(bt => bt.Tag)
+            .Include(b => b.User)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+    }
+
+    private async Task<List<Suggestion>> GetSuggestionsWithDetails(List<Guid> bookIds)
+    {
+        return await _context.Suggestions
+            .Where(s => bookIds.Contains(s.BookId))
+            .Include(s => s.SuggestedBook)
+            .Include(s => s.SuggestedByUser)
+            .Include(s => s.Comments).ThenInclude(c => c.User)
+            .Include(s => s.Upvotes)
+            .ToListAsync();
+    }
+
+    private Dictionary<Guid, List<SuggestionWithCommentsDTO>> MapSuggestions(List<Suggestion> suggestions,
+        string? userId)
+    {
+        return suggestions
+            .GroupBy(s => s.BookId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(s =>
+                {
+                    var dto = _mapper.Map<SuggestionWithCommentsDTO>(s);
+                    dto.UserHasUpvoted = !string.IsNullOrEmpty(userId) &&
+                                         s.Upvotes.Any(u => u.UpvotedBy == Guid.Parse(userId));
+                    return dto;
+                }).ToList()
+            );
+    }
+
+    private List<BookWithSuggestionsDTO> MapBooksWithSuggestions(List<Book> books,
+        Dictionary<Guid, List<SuggestionWithCommentsDTO>> suggestionsDict)
+    {
+        return books
+            .Select(b => new BookWithSuggestionsDTO(
+                _mapper.Map<BookDTO>(b),
+                suggestionsDict.TryGetValue(b.Id, out var suggestions)
+                    ? suggestions
+                    : new List<SuggestionWithCommentsDTO>()
+            ))
+            .Where(bws => bws.Suggestions.Any())
+            .ToList();
+    }
+
+    private async Task<(bool HasMoreBooks, int RemainingBooksCount, DateTime? NextCursor)> ComputePaginationInfo(
+        string? searchTerm, int pageSize, List<BookWithSuggestionsDTO> booksWithSuggestions, DateTime? lastCreatedAt)
+    {
+        if (booksWithSuggestions.Count < pageSize)
+            return (false, 0, null);
+
+        var nextCursor = booksWithSuggestions.Min(bws => bws.Book.CreatedAt);
+
+        var suggestedBookIds = _context.Suggestions
+            .Select(s => s.BookId)
+            .Distinct();
+
+        var remainingQuery = _context.Books
+            .Where(b => suggestedBookIds.Contains(b.Id) && b.CreatedAt < nextCursor);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            remainingQuery = remainingQuery.Where(b => b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm));
+
+        var remainingCount = await remainingQuery.CountAsync();
+
+        return (remainingCount > 0, remainingCount, remainingCount > 0 ? nextCursor : null);
     }
 }
