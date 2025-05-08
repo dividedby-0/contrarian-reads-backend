@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text;
 using System.Threading.RateLimiting;
 using contrarian_reads_backend.Data;
@@ -6,12 +7,23 @@ using contrarian_reads_backend.Profiles;
 using contrarian_reads_backend.Services;
 using contrarian_reads_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 var dbPassword = Environment.GetEnvironmentVariable("MSSQL_DB_PASSWORD");
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options => { options.Level = CompressionLevel.Optimal; });
+builder.Services.Configure<GzipCompressionProviderOptions>(options => { options.Level = CompressionLevel.Optimal; });
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -74,11 +86,12 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 
 //app.UseHttpsRedirection();
+app.UseResponseCompression();
+app.UseExceptionHandler();
+app.UseRateLimiter();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseExceptionHandler();
 app.MapControllers();
-app.UseRateLimiter();
 
 app.Run();
