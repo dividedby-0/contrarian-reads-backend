@@ -160,4 +160,69 @@ public class UsersControllerTests
         // Assert
         Assert.IsType<NoContentResult>(result.Result);
     }
+
+    [Fact]
+    public async Task CreateUser_WithMissingUsername_ReturnsBadRequest()
+    {
+        // Arrange
+        var createUserDto = new CreateUserDTO
+        {
+            Id = Guid.NewGuid(),
+            // Username is missing
+            Email = "test@example.com",
+            Password = "Password123!",
+            ConfirmPassword = "Password123!"
+        };
+
+        _controller.ModelState.AddModelError("Username", "Required");
+
+        // Act
+        var result = await _controller.CreateUser(createUserDto);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithInvalidEmail_ReturnsBadRequest()
+    {
+        var createUserDto = new CreateUserDTO
+        {
+            Id = Guid.NewGuid(),
+            Username = "user",
+            Email = "not-an-email",
+            Password = "Password123!",
+            ConfirmPassword = "Password123!"
+        };
+        _controller.ModelState.AddModelError("Email", "Invalid email format");
+        var result = await _controller.CreateUser(createUserDto);
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetUser_WithEmptyId_ReturnsBadRequest()
+    {
+        // Act
+        var result = await _controller.GetUser(string.Empty);
+
+        // Assert
+        Assert.IsType<BadRequestResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetUser_WithNonExistentId_ReturnsNotFound()
+    {
+        var userId = Guid.NewGuid().ToString();
+        _userServiceMock.Setup(x => x.GetUser(userId))
+            .ReturnsAsync(new NotFoundResult());
+        var result = await _controller.GetUser(userId);
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetUserProfile_WithInvalidGuid_ReturnsBadRequest()
+    {
+        var result = await _controller.GetUserProfile("not-a-guid");
+        Assert.IsType<BadRequestResult>(result.Result);
+    }
 }

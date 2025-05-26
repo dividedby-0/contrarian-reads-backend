@@ -28,6 +28,9 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDTO>> GetUser(string id)
     {
+        if (string.IsNullOrWhiteSpace(id))
+            return BadRequest();
+
         return await _userService.GetUser(id);
     }
 
@@ -36,6 +39,9 @@ public class UsersController : ControllerBase
     [HttpGet("profile/{userId}")]
     public async Task<ActionResult<UserProfileDTO>> GetUserProfile(string userId)
     {
+        if (!Guid.TryParse(userId, out var guid))
+            return BadRequest();
+
         return await _userService.GetUserProfile(Guid.Parse(userId));
     }
 
@@ -43,6 +49,11 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDTO>> CreateUser(CreateUserDTO createUserDTO)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         return await _userService.CreateUser(createUserDTO);
     }
 
